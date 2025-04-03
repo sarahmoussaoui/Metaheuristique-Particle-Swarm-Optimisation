@@ -93,6 +93,18 @@ class JSSP:
 
         return self.schedule
 
+    def calculate_makespan(self):
+        """Calculates the makespan (total completion time) of the current schedule."""
+        if not self.schedule:
+            return 0
+
+        max_end_time = 0
+        for machine_ops in self.schedule.values():
+            for op in machine_ops:
+                if op["end"] > max_end_time:
+                    max_end_time = op["end"]
+        return max_end_time
+
     def generate_random_solution(self):
         """Generates a valid random solution respecting operation order."""
         # Create a list of all operations with their job and position
@@ -227,3 +239,4 @@ print("random_solution : \n", random_solution, "\n\n")
 gantt = jssp.generate_gantt_chart(random_solution)
 jssp.print_gantt_chart()
 plot_gantt_chart(jssp)  # This will display the visual Gantt chart
+print(jssp.calculate_makespan())
