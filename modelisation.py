@@ -240,3 +240,4 @@ gantt = jssp.generate_gantt_chart(random_solution)
 jssp.print_gantt_chart()
 plot_gantt_chart(jssp)  # This will display the visual Gantt chart
 print(jssp.calculate_makespan())
+print(jssp.schedule)
