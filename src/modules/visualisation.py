@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
+import os
 
 
 class ScheduleVisualizer:
     """Handles visualization of schedules."""
 
     @staticmethod
-    def plot_gantt_chart(jssp, figsize=(15, 8)):
+    def plot_gantt_chart(jssp, figsize=(15, 8) , save_folder=None , filename="gantt_chart.png",):
         """Plots a Gantt chart for the JSSP schedule."""
         fig, ax = plt.subplots(figsize=figsize)
         machines = sorted({op.machine for job in jssp.jobs for op in job.operations})
@@ -59,11 +60,29 @@ class ScheduleVisualizer:
         ]
         ax.legend(handles=legend_patches, bbox_to_anchor=(1.05, 1), loc="upper left")
         plt.tight_layout()
+        if save_folder is not None:
+            # Create directory if it doesn't exist
+            os.makedirs(save_folder, exist_ok=True)
+            save_path = os.path.join(save_folder, filename)
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            print(f"Plot saved to: {save_path}")
         plt.show()
 
     @staticmethod
-    def plot_convergence(iteration_history, makespan_history):
-        """Plots the makespan improvement over iterations."""
+    def plot_convergence(
+        iteration_history,
+        makespan_history,
+        save_folder=None,
+        filename="convergence_plot.png",
+    ):
+        """Plots the makespan improvement over iterations and optionally saves to a folder.
+
+        Args:
+           iteration_history: List of iteration numbers
+           makespan_history: List of best makespan values at each iteration
+           save_folder: Path to folder where plot should be saved (None to not save)
+           filename: Name of the file to save (default: "convergence_plot.png")
+        """
         plt.figure(figsize=(10, 5))
         plt.plot(iteration_history, makespan_history, "b-", linewidth=1.5)
         plt.xlabel("Iteration")
@@ -71,4 +90,12 @@ class ScheduleVisualizer:
         plt.title("Makespan Improvement Over Iterations")
         plt.grid(True, linestyle="--", alpha=0.7)
         plt.tight_layout()
+
+        if save_folder is not None:
+            # Create directory if it doesn't exist
+            os.makedirs(save_folder, exist_ok=True)
+            save_path = os.path.join(save_folder, filename)
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            print(f"Plot saved to: {save_path}")
+
         plt.show()
