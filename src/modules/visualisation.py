@@ -14,7 +14,7 @@ class ScheduleVisualizer:
         save_folder=None,
         filename="gantt_chart.png",
     ):
-        """Plots a Gantt chart for the JSSP schedule."""
+        """Plots a Gantt chart for the JSSP schedule without job color legend."""
         fig, ax = plt.subplots(figsize=figsize)
         machines = sorted({op.machine for job in jssp.jobs for op in job.operations})
         y_ticks = np.arange(len(machines))
@@ -59,11 +59,6 @@ class ScheduleVisualizer:
         )
         ax.set_xlim(0, max_time * 1.05)
 
-        legend_patches = [
-            patches.Patch(color=colors(i), label=f"Job {i}")
-            for i in range(jssp.num_jobs)
-        ]
-        ax.legend(handles=legend_patches, bbox_to_anchor=(1.05, 1), loc="upper left")
         plt.tight_layout()
         if save_folder is not None:
             # Create directory if it doesn't exist
@@ -113,7 +108,6 @@ class ScheduleVisualizer:
         plt.ylabel("Best Makespan")
         plt.title("Makespan Improvement Over Iterations")
         plt.grid(True, linestyle="--", alpha=0.7)
-        plt.legend()
         plt.tight_layout()
 
         if save_folder is not None:
