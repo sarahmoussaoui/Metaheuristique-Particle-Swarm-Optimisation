@@ -66,13 +66,13 @@ class Particle:
                 new_velocity.append(swap)
 
         for i in range(len(self.position)):
-            if random.random() < random.random() * c1 and i < len(self.best_position):
+            if random.random() < random.random() * c1:
                 if self.position[i] != self.best_position[i]:
                     j = self.best_position.index(self.position[i])
                     new_velocity.append((i, j))
 
         for i in range(len(self.position)):
-            if random.random() < random.random() * c2 and i < len(global_best_position):
+            if random.random() < random.random() * c2:
                 if self.position[i] != global_best_position[i]:
                     j = global_best_position.index(self.position[i])
                     new_velocity.append((i, j))
