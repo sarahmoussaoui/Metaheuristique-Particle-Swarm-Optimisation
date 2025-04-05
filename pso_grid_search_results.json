@@ -2,37 +2,37 @@
   "current_best_parameters": {
     "num_particles": 10,
     "max_iter": 50,
-    "w": 0.4,
-    "c1": 1.0,
-    "c2": 2.0
+    "w": 0.7,
+    "c1": 2.0,
+    "c2": 1.0
   },
-  "current_avg_makespan": 2391,
-  "current_avg_exec_time": 24.1532253742218,
+  "current_avg_makespan": 2385.8,
+  "current_avg_exec_time": 8.021665954589844,
   "current_individual_results": {
     "data_20j_15m_1.txt": {
-      "makespan": 2354,
-      "exec_time": 28.176172256469727
+      "makespan": 2449,
+      "exec_time": 8.148326396942139
     },
     "data_20j_15m_2.txt": {
-      "makespan": 2461,
-      "exec_time": 24.249573469161987
+      "makespan": 2533,
+      "exec_time": 8.082955598831177
     },
     "data_20j_15m_3.txt": {
-      "makespan": 2535,
-      "exec_time": 23.6829617023468
+      "makespan": 2340,
+      "exec_time": 8.006616830825806
     },
     "data_20j_15m_4.txt": {
-      "makespan": 2332,
-      "exec_time": 24.877864122390747
+      "makespan": 2342,
+      "exec_time": 7.614080905914307
     },
     "data_20j_15m_5.txt": {
-      "makespan": 2273,
-      "exec_time": 19.779555320739746
+      "makespan": 2265,
+      "exec_time": 8.256350040435791
     }
   },
   "search_progress": {
-    "completed": 3,
+    "completed": 16,
     "total": 324
   },
-  "timestamp": "2025-04-05T13:17:22.886861"
+  "timestamp": "2025-04-05T13:27:16.627060"
 }

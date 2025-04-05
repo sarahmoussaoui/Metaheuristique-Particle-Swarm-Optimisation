@@ -1,0 +1,58 @@
+{
+  "current_best_parameters": {
+    "num_particles": 10,
+    "max_iter": 30,
+    "w": 0.7,
+    "c1": 1.0,
+    "c2": 1.0
+  },
+  "current_avg_makespan": 2427.5,
+  "current_avg_exec_time": 22.85843243598938,
+  "current_individual_results": {
+    "data_20j_15m_1.txt": {
+      "makespan": 2479,
+      "exec_time": 20.517969846725464
+    },
+    "data_20j_15m_10.txt": {
+      "makespan": 2472,
+      "exec_time": 22.210764169692993
+    },
+    "data_20j_15m_2.txt": {
+      "makespan": 2425,
+      "exec_time": 24.656952381134033
+    },
+    "data_20j_15m_3.txt": {
+      "makespan": 2367,
+      "exec_time": 21.210864067077637
+    },
+    "data_20j_15m_4.txt": {
+      "makespan": 2320,
+      "exec_time": 23.437689781188965
+    },
+    "data_20j_15m_5.txt": {
+      "makespan": 2503,
+      "exec_time": 16.505305290222168
+    },
+    "data_20j_15m_6.txt": {
+      "makespan": 2468,
+      "exec_time": 24.070407152175903
+    },
+    "data_20j_15m_7.txt": {
+      "makespan": 2708,
+      "exec_time": 19.495054006576538
+    },
+    "data_20j_15m_8.txt": {
+      "makespan": 2288,
+      "exec_time": 22.265151977539062
+    },
+    "data_20j_15m_9.txt": {
+      "makespan": 2245,
+      "exec_time": 34.214165687561035
+    }
+  },
+  "search_progress": {
+    "completed": 10,
+    "total": 243
+  },
+  "timestamp": "2025-04-05T14:55:51.903318"
+}
