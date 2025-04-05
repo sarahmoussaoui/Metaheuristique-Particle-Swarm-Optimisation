@@ -13,13 +13,11 @@ class PSOOptimizer:
         self.iteration_history = []
         self.makespan_history = []
 
-    @staticmethod
-    def generate_initial_sequence(jssp: "JSSP") -> List[Tuple[int, int]]:
+    def generate_initial_sequence(self) -> List[Tuple[int, int]]:
         """Generates a valid initial sequence preserving operation order within jobs."""
-        remaining_ops = {
-            job_idx: [op.machine - 1 for op in jssp.jobs[job_idx].operations]
-            for job_idx in range(jssp.num_jobs)
-        }
+
+        remaining_ops = deepcopy(self.jssp.job_machine_dict)
+
         sequence = []
 
         while any(remaining_ops.values()):
@@ -44,9 +42,8 @@ class PSOOptimizer:
         global_best_fitness = float("inf")
 
         for _ in range(num_particles):
-            sequence = self.generate_initial_sequence(self.jssp)
-            print("init seq", sequence)
-            particles.append(Particle(sequence))
+            sequence = self.generate_initial_sequence()
+            particles.append(Particle(sequence, self.jssp.job_machine_dict))
 
         for iteration in range(max_iter):
             for particle in particles:
@@ -65,7 +62,7 @@ class PSOOptimizer:
 
             for particle in particles:
                 particle.update_velocity(global_best_position, w, c1, c2)
-                particle.update_position()
+                particle.update_position(self.jssp.job_machine_dict)
 
             if iteration % 10 == 0:
                 print(f"Iteration {iteration}, Best Makespan: {global_best_fitness}")

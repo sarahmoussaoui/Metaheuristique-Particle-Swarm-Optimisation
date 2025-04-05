@@ -36,6 +36,10 @@ class JSSP:
             Job(j, machines_matrix[j], times_matrix[j]) for j in range(self.num_jobs)
         ]
         self.schedule = {}  # Stores start & end times per machine
+        self.job_machine_dict = {
+            job_idx: [op.machine - 1 for op in self.jobs[job_idx].operations]
+            for job_idx in range(self.num_jobs)
+        }
         self.initialize_schedule()
 
     def initialize_schedule(self):

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # Create and run optimization
     jssp = JSSP(machines_matrix, times_matrix)
     optimizer = PSOOptimizer(jssp)
-    best_schedule, best_makespan = optimizer.optimize(num_particles=20, max_iter=50)
+    best_schedule, best_makespan = optimizer.optimize(num_particles=20, max_iter=2)
 
     # Display results
     print(best_schedule)
