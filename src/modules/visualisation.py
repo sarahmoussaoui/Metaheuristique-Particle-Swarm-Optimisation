@@ -8,7 +8,12 @@ class ScheduleVisualizer:
     """Handles visualization of schedules."""
 
     @staticmethod
-    def plot_gantt_chart(jssp, figsize=(15, 8) , save_folder=None , filename="gantt_chart.png",):
+    def plot_gantt_chart(
+        jssp,
+        figsize=(15, 8),
+        save_folder=None,
+        filename="gantt_chart.png",
+    ):
         """Plots a Gantt chart for the JSSP schedule."""
         fig, ax = plt.subplots(figsize=figsize)
         machines = sorted({op.machine for job in jssp.jobs for op in job.operations})
@@ -66,29 +71,49 @@ class ScheduleVisualizer:
             save_path = os.path.join(save_folder, filename)
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Plot saved to: {save_path}")
-        plt.show()
+        plt.close()
 
     @staticmethod
     def plot_convergence(
         iteration_history,
         makespan_history,
+        upper_bound=None,
         save_folder=None,
         filename="convergence_plot.png",
     ):
         """Plots the makespan improvement over iterations and optionally saves to a folder.
 
         Args:
-           iteration_history: List of iteration numbers
-           makespan_history: List of best makespan values at each iteration
-           save_folder: Path to folder where plot should be saved (None to not save)
-           filename: Name of the file to save (default: "convergence_plot.png")
+          iteration_history: List of iteration numbers
+          makespan_history: List of best makespan values at each iteration
+          upper_bound: A constant value representing the upper bound to show on the plot
+          save_folder: Path to folder where plot should be saved (None to not save)
+          filename: Name of the file to save (default: "convergence_plot.png")
         """
         plt.figure(figsize=(10, 5))
-        plt.plot(iteration_history, makespan_history, "b-", linewidth=1.5)
+        plt.plot(
+            iteration_history,
+            makespan_history,
+            "b-",
+            linewidth=1.5,
+            label="Best Makespan",
+        )
+
+        # Add upper bound line
+        if upper_bound is not None:
+            plt.axhline(
+                y=upper_bound,
+                color="r",
+                linestyle="--",
+                linewidth=1.5,
+                label=f"Upper Bound = {upper_bound}",
+            )
+
         plt.xlabel("Iteration")
         plt.ylabel("Best Makespan")
         plt.title("Makespan Improvement Over Iterations")
         plt.grid(True, linestyle="--", alpha=0.7)
+        plt.legend()
         plt.tight_layout()
 
         if save_folder is not None:
@@ -98,4 +123,4 @@ class ScheduleVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Plot saved to: {save_path}")
 
-        plt.show()
+        plt.close()

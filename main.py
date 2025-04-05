@@ -19,7 +19,9 @@ class JSSPProcessor:
         with open(self.dataset_path, "r") as file:
             dataset_str = file.read()
 
-        num_jobs, num_machines, times, machines = DatasetParser.parse(dataset_str)
+        num_jobs, num_machines, upper_bound, lower_bound, times, machines = (
+            DatasetParser.parse(dataset_str)
+        )
         os.makedirs(self.output_dir, exist_ok=True)
 
         jssp = JSSP(machines, times)
@@ -32,6 +34,7 @@ class JSSPProcessor:
         ScheduleVisualizer.plot_convergence(
             optimizer.iteration_history,
             optimizer.makespan_history,
+            upper_bound=upper_bound,
             save_folder=self.output_dir,
         )
         ScheduleVisualizer.plot_gantt_chart(jssp, save_folder=self.output_dir)
@@ -53,7 +56,7 @@ class JSSPProcessor:
 
 # === MAIN ===
 if __name__ == "__main__":
-    dataset_folder = "src/data/"
+    dataset_folder = "src\data\processed"
 
     for filename in os.listdir(dataset_folder):
         if filename.endswith(".txt"):

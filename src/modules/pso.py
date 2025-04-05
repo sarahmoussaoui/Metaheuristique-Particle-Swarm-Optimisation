@@ -14,13 +14,20 @@ class PSOOptimizer:
         self.makespan_history = []
 
     @staticmethod
-    def generate_initial_sequence(jssp: JSSP) -> List[Tuple[int, int]]:
-        """Generate a random but valid initial sequence of operations."""
+    def generate_initial_sequence(jssp: "JSSP") -> List[Tuple[int, int]]:
+        """Generates a valid initial sequence preserving operation order within jobs."""
+        remaining_ops = {
+            job_idx: [op.machine - 1 for op in jssp.jobs[job_idx].operations]
+            for job_idx in range(jssp.num_jobs)
+        }
         sequence = []
-        for job_idx in range(jssp.num_jobs):
-            for op_idx in range(len(jssp.jobs[job_idx].operations)):
-                sequence.append((job_idx, op_idx))
-        random.shuffle(sequence)
+
+        while any(remaining_ops.values()):
+            available_jobs = [j for j, ops in remaining_ops.items() if ops]
+            job = random.choice(available_jobs)
+            op_idx = remaining_ops[job].pop(0)
+            sequence.append((job, op_idx))
+
         return sequence
 
     def optimize(
@@ -38,6 +45,7 @@ class PSOOptimizer:
 
         for _ in range(num_particles):
             sequence = self.generate_initial_sequence(self.jssp)
+            print("init seq", sequence)
             particles.append(Particle(sequence))
 
         for iteration in range(max_iter):

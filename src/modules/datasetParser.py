@@ -8,10 +8,15 @@ class DatasetParser:
         while i < len(lines) and not lines[i].strip().startswith("Times"):
             i += 1
 
-        # Go back to get the number of jobs and machines line (usually 1 line above "Times")
+        # Go back to get the number of jobs and machines line , upper_bound, lower_bound
         meta_line = lines[i - 1]
         parts = meta_line.split()
-        num_jobs, num_machines = int(parts[0]), int(parts[1])
+        num_jobs, num_machines, upper_bound, lower_bound = (
+            int(parts[0]),
+            int(parts[1]),
+            int(parts[4]),
+            int(parts[5]),
+        )
 
         # Now extract time matrix
         i += 1  # Skip "Times"
@@ -27,4 +32,4 @@ class DatasetParser:
             machines.append(list(map(int, lines[i].strip().split())))
             i += 1
 
-        return num_jobs, num_machines, times, machines
+        return num_jobs, num_machines, upper_bound, lower_bound, times, machines
