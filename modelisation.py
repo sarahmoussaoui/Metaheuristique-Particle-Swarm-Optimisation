@@ -36,17 +36,4 @@ class JSSP:
     def __repr__(self):
         return f"JSSP with {self.num_jobs} Jobs and {self.num_machines} Machines"
 
-# Example: Loading dataset
-machines_matrix = [
-    [4, 12, 15, 2, 11, 3, 5, 8, 1, 13, 6, 10, 7, 14, 9],
-    [6, 1, 4, 9, 5, 2, 13, 15, 7, 8, 11, 3, 10, 14, 12]
-]
-times_matrix = [
-    [25, 75, 75, 76, 38, 62, 38, 59, 14, 13, 46, 31, 57, 92, 3],
-    [67, 5, 11, 11, 40, 34, 77, 42, 35, 96, 22, 55, 21, 29, 16]
-]
 
-# Creating a JSSP instance
-jssp = JSSP(machines_matrix, times_matrix)
-print(jssp)
-print(jssp.jobs)
