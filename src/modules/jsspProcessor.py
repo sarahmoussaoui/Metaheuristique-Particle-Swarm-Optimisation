@@ -27,6 +27,7 @@ class JSSPProcessor:
         w: float = 0.7,
         c1: float = 1.5,
         c2: float = 1.5,
+        use_spt: bool = False
     ):
         with open(self.dataset_path, "r") as file:
             dataset_str = file.read()

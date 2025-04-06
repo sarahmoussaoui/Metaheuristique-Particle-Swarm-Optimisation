@@ -13,7 +13,7 @@ class PSOOptimizer:
         self.iteration_history = []
         self.makespan_history = []
 
-    def generate_initial_sequence(self) -> List[Tuple[int, int]]:
+    def generate_random_initial_sequence(self) -> List[Tuple[int, int]]:
         """Generates a valid initial sequence preserving operation order within jobs."""
 
         remaining_ops = deepcopy(self.jssp.job_machine_dict)
@@ -27,6 +27,42 @@ class PSOOptimizer:
             sequence.append((job, op_idx))
 
         return sequence
+    
+
+    def generate_spt_initial_sequence(self) -> List[Tuple[int, int]]:
+        """ Generates an initial sequence using Shortest Processing Time (SPT) rule.
+        Prioritizes operations with the shortest processing times while preserving job operation order.
+        """
+        
+        # Create a list of all operations with their job, op index, and processing time
+        all_ops = []
+        for job_idx in self.jssp.job_machine_dict:
+            for op_idx in range(len(self.jssp.job_machine_dict[job_idx])):
+                processing_time = self.jssp.times_matrix[job_idx][op_idx]
+                all_ops.append((job_idx, op_idx, processing_time))
+        
+        # Sort operations by processing time (shortest first)
+        all_ops.sort(key=lambda x: x[2])
+        
+        # Initialize tracking of next operation needed for each job
+        next_op_for_job = {job_idx: 0 for job_idx in self.jssp.job_machine_dict}
+        sequence = []
+        
+        # Build the sequence while respecting operation order within jobs
+        for job_idx, op_idx, _ in all_ops:
+            # Only add if it's the next required operation for its job
+            if op_idx == next_op_for_job[job_idx]:
+                sequence.append((job_idx, op_idx))
+                next_op_for_job[job_idx] += 1
+        
+        # Add any remaining operations that couldn't be added in SPT order
+        # (due to operation ordering constraints)
+        for job_idx in next_op_for_job:
+            while next_op_for_job[job_idx] < len(self.jssp.job_machine_dict[job_idx]):
+                sequence.append((job_idx, next_op_for_job[job_idx]))
+                next_op_for_job[job_idx] += 1
+        
+        return sequence
 
     def optimize(
         self,
@@ -35,15 +71,20 @@ class PSOOptimizer:
         w: float = 0.7,
         c1: float = 1.5,
         c2: float = 1.5,
+        use_spt=False
     ):
         """Run the PSO optimization."""
         particles = []
         global_best_position = None
         global_best_fitness = float("inf")
 
-        for _ in range(num_particles): # Creates swarm with random valid sequences
-            sequence = self.generate_initial_sequence()
+        for _ in range(num_particles):
+            if use_spt and _ == 0:  # Use SPT for the first particle
+                sequence = self.generate_spt_initial_sequence()
+            else:
+                sequence = self.generate_random_initial_sequence()
             particles.append(Particle(sequence, self.jssp.job_machine_dict))
+
 
         for iteration in range(max_iter):
             # Evaluation phase
