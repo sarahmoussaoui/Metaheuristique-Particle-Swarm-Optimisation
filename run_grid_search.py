@@ -4,7 +4,7 @@ from src.modules.gridSearch import PSOGridSearch  # Your class file
 
 # Folders to process
 folders = ["data_20j_15m", "data_30j_15m", "data_50j_15m", "data_100j_20m"]
-
+MAX_ITER = 100
 root_dataset_dir = "src\data\processed"
 csv_filename_all = "grid_search_results.csv"
 csv_filename_best = "best_params_per_folder.csv"
@@ -17,28 +17,24 @@ overall_makespan_per_combo = {}
 folder_param_grids = {
     "data_20j_15m": {
         "num_particles": [10, 30, 50],
-        "max_iter": [30, 50, 100],
         "w": [0.4, 0.7, 0.9],  # inertia weight
         "c1": [1.0, 1.5, 2.0],  # cognitive coefficient
         "c2": [1.0, 1.5, 2.0],  # social coefficient
     },
     "data_30j_15m": {
         "num_particles": [30, 50, 70],
-        "max_iter": [50, 70, 100],
         "w": [0.4, 0.7, 0.9],
         "c1": [1.5],
         "c2": [1.5, 2.0],
     },
     "data_50j_15m": {
         "num_particles": [50, 100],
-        "max_iter": [50, 100],
         "w": [0.7, 0.9],
         "c1": [1.5],
         "c2": [1.5, 2.0],
     },
     "data_100j_20m": {
         "num_particles": [100],
-        "max_iter": [50, 100],
         "w": [0.7, 0.9],
         "c1": [1.5],
         "c2": [2.0],
@@ -52,7 +48,9 @@ for folder in folders:
 
     # Init grid search
     search = PSOGridSearch(
-        dataset_folder=folder_path, output_file=f"{folder}_results.json"
+        max_iter=MAX_ITER,
+        dataset_folder=folder_path,
+        output_file=f"{folder}_results.json",
     )
     search.set_parameter_grid(param_grid)
 
@@ -96,7 +94,6 @@ for folder in folders:
 fieldnames_all = [
     "folder",
     "num_particles",
-    "max_iter",
     "w",
     "c1",
     "c2",
@@ -111,7 +108,6 @@ with open(csv_filename_all, "w", newline="") as f:
 fieldnames_best = [
     "folder",
     "num_particles",
-    "max_iter",
     "w",
     "c1",
     "c2",

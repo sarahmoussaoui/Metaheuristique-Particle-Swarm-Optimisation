@@ -8,4 +8,6 @@ if __name__ == "__main__":
         if filename.endswith(".txt"):
             dataset_path = os.path.join(dataset_folder, filename)
             processor = JSSPProcessor(dataset_path)
-            best_schedule, best_makespan, exec_time = processor.run()
+            best_schedule, best_makespan, exec_time = processor.run(
+                num_particles=30, max_iter=10, w=0.8, c1=1.5, c2=1
+            )

@@ -8,7 +8,9 @@ from src.modules.jsspProcessor import JSSPProcessor
 
 
 class PSOGridSearch:
-    def __init__(self, dataset_folder: str, output_file: str = "best_params.json"):
+    def __init__(
+        self, max_iter, dataset_folder: str, output_file: str = "best_params.json"
+    ):
         """
         Initialize the grid search with dataset folder and output file.
 
@@ -19,11 +21,11 @@ class PSOGridSearch:
         self.dataset_folder = dataset_folder
         self.output_file = output_file
         self.best_results: Dict[str, Any] = {}
+        self.max_iter = max_iter
 
         # Default parameter grid
         self.param_grid = {
-            "num_particles": [10, 30, 50, 100],
-            "max_iter": [50, 100, 200],
+            "num_particles": [30, 50, 100],
             "w": [0.4, 0.7, 0.9],  # inertia weight
             "c1": [1.0, 1.5, 2.0],  # cognitive coefficient
             "c2": [1.0, 1.5, 2.0],  # social coefficient
@@ -58,10 +60,16 @@ class PSOGridSearch:
 
         for dataset_path in self.dataset_files:
             filename = os.path.basename(dataset_path)
-            processor = JSSPProcessor(dataset_path=dataset_path, plot=False, **params)
+            processor = JSSPProcessor(dataset_path=dataset_path, plot=False)
 
-            _, makespan, exec_time = processor.run()
-
+            # Explicitly pass parameters from the dictionary
+            _, makespan, exec_time = processor.run(
+                num_particles=params["num_particles"],
+                max_iter=self.max_iter,
+                w=params["w"],
+                c1=params["c1"],
+                c2=params["c2"],
+            )
             makespans.append(makespan)
             exec_times.append(exec_time)
             individual_results[filename] = {

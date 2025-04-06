@@ -1,10 +1,10 @@
+from src.modules.modelisation import JSSP
+from src.modules.datasetParser import DatasetParser
+from src.modules.visualisation import ScheduleVisualizer
+from src.modules.genetic import GeneticAlgorithm
 import os
 import time
 import csv
-from src.modules.modelisation import JSSP
-from src.modules.visualisation import ScheduleVisualizer
-from src.modules.pso import PSOOptimizer
-from src.modules.datasetParser import DatasetParser
 
 
 class JSSPProcessor:
@@ -12,7 +12,7 @@ class JSSPProcessor:
         self,
         dataset_path,
         plot: bool = True,
-        output_base="output",
+        output_base="output_gen",
     ):
         self.dataset_path = dataset_path
         self.dataset_name = os.path.splitext(os.path.basename(dataset_path))[0]
@@ -20,14 +20,7 @@ class JSSPProcessor:
         self.log_file = os.path.join(self.output_dir, "results.csv")
         self.plot = plot
 
-    def run(
-        self,
-        num_particles: int = 30,
-        max_iter: int = 100,
-        w: float = 0.7,
-        c1: float = 1.5,
-        c2: float = 1.5,
-    ):
+    def run(self, population_size=20, generations=50, mutation_rate=0.1):
         with open(self.dataset_path, "r") as file:
             dataset_str = file.read()
 
@@ -38,16 +31,15 @@ class JSSPProcessor:
 
         jssp = JSSP(machines, times)
 
-        optimizer = PSOOptimizer(jssp)
+        optimizer = GeneticAlgorithm(jssp)
         start_time = time.time()
-        best_schedule, best_makespan = optimizer.optimize(
-            num_particles=num_particles,
-            max_iter=max_iter,
-            w=w,
-            c1=c1,
-            c2=c2,
+        best_schedule, best_makespan = optimizer.evolve(
+            mutation_rate=mutation_rate,
+            population_size=population_size,
+            generations=generations,
         )
         exec_time = time.time() - start_time
+
         if self.plot:
             ScheduleVisualizer.plot_convergence(
                 optimizer.iteration_history,
@@ -71,3 +63,11 @@ class JSSPProcessor:
             if not csv_exists:
                 writer.writerow(["Dataset", "Best Makespan", "Execution Time (s)"])
             writer.writerow([self.dataset_name, best_makespan, f"{exec_time:.4f}"])
+
+
+if __name__ == "__main__":
+    # Example usage
+    processor = JSSPProcessor(
+        dataset_path="./src/data/processed/data_20j_15m/data_20j_15m_1.txt"
+    )
+    processor.run(population_size=50, generations=100, mutation_rate=0.05)

@@ -1,3 +1,6 @@
 Dataset,Best Makespan,Execution Time (s)
 data_20j_15m_1,2394,33.6980
 data_20j_15m_1,2386,16.5868
+data_20j_15m_1,2371,40.9057
+data_20j_15m_1,2524,4.9079
+data_20j_15m_1,2463,5.0086
