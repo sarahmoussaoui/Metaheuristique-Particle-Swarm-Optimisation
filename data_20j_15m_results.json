@@ -1,0 +1,25 @@
+{
+  "current_best_parameters": {
+    "num_particles": 10,
+    "w": 0.7,
+    "c1": 1.0,
+    "c2": 1.5
+  },
+  "current_avg_makespan": 2474,
+  "current_avg_exec_time": 19.396601676940918,
+  "current_individual_results": {
+    "data_20j_15m_1.txt": {
+      "makespan": 2444,
+      "exec_time": 20.968905210494995
+    },
+    "data_20j_15m_2.txt": {
+      "makespan": 2504,
+      "exec_time": 17.82429814338684
+    }
+  },
+  "search_progress": {
+    "completed": 11,
+    "total": 81
+  },
+  "timestamp": "2025-04-06T21:07:28.829487"
+}
