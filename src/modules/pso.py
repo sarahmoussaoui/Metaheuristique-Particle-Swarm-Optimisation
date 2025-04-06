@@ -62,7 +62,7 @@ class PSOOptimizer:
 
             for particle in particles:
                 particle.update_velocity(global_best_position, w, c1, c2)
-                particle.update_position(self.jssp.job_machine_dict)
+                particle.update_position()
 
             if iteration % 10 == 0:
                 print(f"Iteration {iteration}, Best Makespan: {global_best_fitness}")

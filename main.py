@@ -9,5 +9,5 @@ if __name__ == "__main__":
             dataset_path = os.path.join(dataset_folder, filename)
             processor = JSSPProcessor(dataset_path)
             best_schedule, best_makespan, exec_time = processor.run(
-                num_particles=30, max_iter=10, w=0.8, c1=1.5, c2=1
+                num_particles=100, max_iter=200, w=0.9, c1=0.7, c2=2
             )
