@@ -49,6 +49,7 @@ class JSSP:
     def __repr__(self):
         return f"JSSP with {self.num_jobs} Jobs and {self.num_machines} Machines"
 
+
     def evaluate_schedule(self, operation_sequence: List[Tuple[int, int]]) -> int:
         """Evaluates a schedule and returns the makespan."""
         for job in self.jobs:
