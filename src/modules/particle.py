@@ -107,7 +107,7 @@ class Particle:
     def update_velocity(
         self,
         global_best_position: List[Tuple[int, int]],
-        w: float,
+        w: float, 
         c1: float,
         c2: float,
     ):
@@ -205,7 +205,7 @@ class Particle:
         # Social component
         print("\nApplying social component (global best):")
         for i in range(len(self.position)):
-            if random.random() < random.random() * c2:
+            if random.random() < random.random() * c2: # Probability random() * c2 controls swarm influence
                 print(f"\nSocial component triggered for position {i}")
                 if self.position[i] != global_best_position[i]:
                     j = global_best_position.index(self.position[i])

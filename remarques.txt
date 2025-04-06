@@ -1,0 +1,4 @@
+
+random() is uniform:
+  The chance of landing below w is exactly w (e.g., 60% of the range = 60% probability).
+  The chance of landing above w is 1 - w (40%).

@@ -36,15 +36,15 @@ class JSSP:
             Job(j, machines_matrix[j], times_matrix[j]) for j in range(self.num_jobs)
         ]
         self.schedule = {}  # Stores start & end times per machine
-        self.job_machine_dict = {
-            job_idx: [op.machine - 1 for op in self.jobs[job_idx].operations]
+        self.job_machine_dict = { # Maps job IDs to their machine IDs : Speeds up access during scheduling (no need to recompute machine assignments repeatedly).
+            job_idx: [op.machine - 1 for op in self.jobs[job_idx].operations] #Creates a lookup table where, for each job (job_idx), we store the machine IDs (0-based index) for its operations because  Machine IDs are 1-indexed in the input
             for job_idx in range(self.num_jobs)
         }
         self.initialize_schedule()
 
     def initialize_schedule(self):
         """Creates an empty schedule for all machines."""
-        self.schedule = {m: [] for m in range(1, self.num_machines + 1)}
+        self.schedule = {m: [] for m in range(1, self.num_machines + 1)} # self.schedule is populated with keys for each machine (e.g., {1: [], 2: [], 3: []} for 3 machines).
 
     def __repr__(self):
         return f"JSSP with {self.num_jobs} Jobs and {self.num_machines} Machines"
@@ -59,13 +59,13 @@ class JSSP:
             job.current_operation_index = 0
 
         self.initialize_schedule()
-        job_times = [0] * self.num_jobs
-        machine_times = {m: 0 for m in self.schedule.keys()}
+        job_times = [0] * self.num_jobs # Tracks the completion time of each job (initially 0).
+        machine_times = {m: 0 for m in self.schedule.keys()} # Tracks when each machine is free
 
         for job_idx, op_idx in operation_sequence:
             job = self.jobs[job_idx]
             op = job.operations[op_idx]
-            start_time = max(job_times[job_idx], machine_times[op.machine])
+            start_time = max(job_times[job_idx], machine_times[op.machine]) # Start when job and machine are free 
             end_time = start_time + op.processing_time
             op.start_time = start_time
             op.end_time = end_time
