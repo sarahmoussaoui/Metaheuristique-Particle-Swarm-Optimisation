@@ -41,18 +41,21 @@ class PSOOptimizer:
         global_best_position = None
         global_best_fitness = float("inf")
 
-        for _ in range(num_particles):
+        for _ in range(num_particles): # Creates swarm with random valid sequences
             sequence = self.generate_initial_sequence()
             particles.append(Particle(sequence, self.jssp.job_machine_dict))
 
         for iteration in range(max_iter):
+            # Evaluation phase
             for particle in particles:
                 particle.fitness = self.jssp.evaluate_schedule(particle.position)
 
+                # Update personal best
                 if particle.fitness < particle.best_fitness:
                     particle.best_fitness = particle.fitness
                     particle.best_position = deepcopy(particle.position)
 
+                # Update global best
                 if particle.fitness < global_best_fitness:
                     global_best_fitness = particle.fitness
                     global_best_position = deepcopy(particle.position)
