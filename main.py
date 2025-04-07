@@ -9,14 +9,14 @@ if __name__ == "__main__":
             dataset_path = os.path.join(dataset_folder, filename)
             processor = JSSPProcessor(dataset_path)
             best_schedule, best_makespan, exec_time = processor.run(
-                num_particles=100,
-                max_iter=300,
-                w=0.7,
-                c1=1.5,
-                c2=1.5,
+                num_particles=20,
+                max_iter=2000,
+                w=0.5,
+                c1=1,
+                c2=2,
                 adaptive_params=True,
                 mutation_rate=0.2,
-                max_stagnation=40,
-                early_stopping_window=40,
-                improvement_threshold=0.01,
+                max_stagnation=20,
+                early_stopping_window=None,
+                improvement_threshold=0.05,
             )

@@ -3,7 +3,7 @@ from src.modules.gridSearch import PSOGridSearch
 
 def main():
     # Configuration
-    max_iter = 300  # Number of iterations for each PSO run
+    max_iter = 2000  # Number of iterations for each PSO run
     dataset_folder = (
         "src/data/processed/data_20j_15m"  # Folder containing your JSSP instance files
     )
@@ -22,13 +22,13 @@ def main():
     # Optional: Customize parameter grid if needed
     grid_search.set_parameter_grid(
         {
-            "num_particles": [20, 30, 50, 70, 100],  # Specific values
+            "num_particles": [20, 30, 50],  # Specific values
             "w": (0.4, 0.9),  # Range
             "c1": [0.5, 1, 1.5, 2],  # Fixed value
             "c2": [0.5, 1, 1.5, 2],  # Fixed value
             "mutation_rate": [0.1, 0.2, 0.3],  # Fixed
-            "max_stagnation": [30],
-            "early_stopping_window": [100],  # Fixed
+            "max_stagnation": [20],
+            "early_stopping_window": [None],  # Fixed
             "improvement_threshold": [0.005],
         },
     )

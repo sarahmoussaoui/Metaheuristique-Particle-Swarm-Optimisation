@@ -1,25 +1,25 @@
 {
     "best_parameters": {
         "num_particles": 20,
-        "w": 0.40555545665381876,
+        "w": 0.4002350474789838,
         "c1": 1,
-        "c2": 0.5,
-        "mutation_rate": 0.3,
-        "max_stagnation": 30,
-        "early_stopping_window": 100,
+        "c2": 2,
+        "mutation_rate": 0.2,
+        "max_stagnation": 20,
+        "early_stopping_window": null,
         "improvement_threshold": 0.005
     },
-    "average_makespan": 2268,
-    "average_execution_time": 19.75092911720276,
+    "average_makespan": 1775,
+    "average_execution_time": 90.54155039787292,
     "individual_results": {
         "data_20j_15m_1.txt": {
-            "makespan": 2268,
-            "exec_time": 19.75092911720276
+            "makespan": 1775,
+            "exec_time": 90.54155039787292
         }
     },
-    "timestamp": "2025-04-07T05:32:42.316749",
+    "timestamp": "2025-04-07T06:32:55.750706",
     "search_config": {
-        "max_iter": 300,
+        "max_iter": 2000,
         "num_samples": 10,
         "dataset_folder": "src/data/processed/data_20j_15m"
     }
