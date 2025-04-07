@@ -1,0 +1,26 @@
+{
+    "best_parameters": {
+        "num_particles": 20,
+        "w": 0.4013904478948839,
+        "c1": 0.5,
+        "c2": 0.5,
+        "mutation_rate": 0.2,
+        "max_stagnation": 30,
+        "early_stopping_window": 100,
+        "improvement_threshold": 0.005
+    },
+    "average_makespan": 2413,
+    "average_execution_time": 20.76494860649109,
+    "individual_results": {
+        "data_20j_15m_1.txt": {
+            "makespan": 2413,
+            "exec_time": 20.76494860649109
+        }
+    },
+    "timestamp": "2025-04-07T05:07:47.149251",
+    "search_config": {
+        "max_iter": 300,
+        "num_samples": 10,
+        "dataset_folder": "src/data/processed/data_20j_15m"
+    }
+}

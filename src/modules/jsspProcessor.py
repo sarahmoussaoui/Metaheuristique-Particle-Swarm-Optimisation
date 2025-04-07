@@ -27,6 +27,11 @@ class JSSPProcessor:
         w: float = 0.7,
         c1: float = 1.5,
         c2: float = 1.5,
+        adaptive_params: bool = True,
+        mutation_rate: float = 0.1,
+        max_stagnation: int = 15,
+        early_stopping_window: int = 20,
+        improvement_threshold: float = 0.01,
     ):
         with open(self.dataset_path, "r") as file:
             dataset_str = file.read()
@@ -46,6 +51,11 @@ class JSSPProcessor:
             w=w,
             c1=c1,
             c2=c2,
+            adaptive_params=adaptive_params,
+            mutation_rate=mutation_rate,
+            max_stagnation=max_stagnation,
+            early_stopping_window=early_stopping_window,
+            improvement_threshold=improvement_threshold,
         )
         exec_time = time.time() - start_time
         if self.plot:
