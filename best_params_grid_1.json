@@ -1,23 +1,23 @@
 {
     "best_parameters": {
         "num_particles": 20,
-        "w": 0.4013904478948839,
-        "c1": 0.5,
+        "w": 0.40555545665381876,
+        "c1": 1,
         "c2": 0.5,
-        "mutation_rate": 0.2,
+        "mutation_rate": 0.3,
         "max_stagnation": 30,
         "early_stopping_window": 100,
         "improvement_threshold": 0.005
     },
-    "average_makespan": 2413,
-    "average_execution_time": 20.76494860649109,
+    "average_makespan": 2268,
+    "average_execution_time": 19.75092911720276,
     "individual_results": {
         "data_20j_15m_1.txt": {
-            "makespan": 2413,
-            "exec_time": 20.76494860649109
+            "makespan": 2268,
+            "exec_time": 19.75092911720276
         }
     },
-    "timestamp": "2025-04-07T05:07:47.149251",
+    "timestamp": "2025-04-07T05:32:42.316749",
     "search_config": {
         "max_iter": 300,
         "num_samples": 10,

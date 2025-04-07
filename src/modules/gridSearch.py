@@ -44,7 +44,7 @@ class PSOGridSearch:
             "c2": (1.0, 2.0),  # Range
             "mutation_rate": 0.1,  # Exact value
             "max_stagnation": (10, 30),  # Range
-            "early_stopping_window": 70,  # List of exact values
+            "early_stopping_window": 150,  # List of exact values
             "improvement_threshold": 0.01,  # Exact value
         }
 
