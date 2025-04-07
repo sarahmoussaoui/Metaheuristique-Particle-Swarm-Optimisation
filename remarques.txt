@@ -2,3 +2,39 @@
 random() is uniform:
   The chance of landing below w is exactly w (e.g., 60% of the range = 60% probability).
   The chance of landing above w is 1 - w (40%).
+
+
+
+for version mutation and stagnation pso we could : 
+- for centroid : Pour une approche plus précise, tu pourrais aussi inclure les machines dans la mesure de la diversité.
+- calcul de diversite : la distance de Hamming ou la distance de Kendall tau plus appropriée que eucidienne pour les problemes de swaps 
+ou les indices doivent etre respectes
+
+for stagnation : 
+- only 1/5 of worst particles is considered
+- Le nombre de perturbations appliquées est déterminé en fonction de la longueur 
+de la position de la solution (len(global_best_position) // 5), mais ne sera jamais inférieur à 1.
+
+for perturbe :
+  MIN_W = 0.2
+  MAX_MUTATION = 0.6
+  MAX_ATTEMPTS = 50
+
+
+update velocity :
+  has mutation rate in parmaters
+  
+
+# Update particles
+            for particle in particles:
+                particle.update_velocity(
+                    global_best_position, current_w, c1, c2, mutation_rate
+                )
+                particle.update_position()
+                particle.apply_mutation(current_mutation)
+
+early stopping :
+  not working with it 
+  improvement_threshold
+  
+  

@@ -35,22 +35,30 @@ class PSOOptimizer:
         return sequence
 
     def calculate_diversity(self, particles: List[Particle]) -> float:
-        """Calculate population diversity based on position differences."""
+        """Calculate population diversity based on position differences.
+        L’idée ici est de mesurer à quel point les positions des particules sont diverses 
+        par rapport à un centroïde de la population. Plus la diversité est grande, plus la population 
+        explore différents points de l'espace de recherche.
+        
+        """
         if not particles:
             return 0.0
 
-        centroid = [0] * len(particles[0].position)
+        centroid = [0] * len(particles[0].position) # Initialisation du centroid 
+
+        # Calcul du centroïde
         for particle in particles:
             for i, (job, machine) in enumerate(particle.position):
-                centroid[i] += job
+                centroid[i] += job # chaque élément du centroid est un total des ID des jobs pour toutes les particules.
 
-        centroid = [x / len(particles) for x in centroid]
+        centroid = [x / len(particles) for x in centroid] # Moyenne des IDs de jobs.
 
         diversity = 0.0
         for particle in particles:
-            distance = sum((p[0] - c) ** 2 for p, c in zip(particle.position, centroid))
+            distance = sum((p[0] - c) ** 2 for p, c in zip(particle.position, centroid)) # mesures la distance euclidienne entre chaque particule et le centroid
             diversity += math.sqrt(distance)
 
+        # diversité moyenne 
         return diversity / len(particles)
 
     def is_sequence_valid(self, sequence: List[Tuple[int, int]], job_id: int) -> bool:
@@ -68,11 +76,11 @@ class PSOOptimizer:
 
         for i in range(-num_to_reinit, 0):
             particles[i] = Particle(
-                self.generate_initial_sequence(), self.jssp.job_machine_dict
+                self.generate_initial_sequence(), self.jssp.job_machine_dict # Ces nouvelles particules sont ainsi réintroduites pour favoriser l'exploration de nouvelles zones de l'espace de recherche.
             )
 
-        # Add perturbed global best
-        perturbed = self.perturb_solution(
+        # Add perturbed global best : modifie légèrement la position de la meilleure solution pour l'empêcher de stagner.
+        perturbed = self.perturb_solution( 
             global_best_position, max(len(global_best_position) // 5, 1)
         )
         particles[-1] = Particle(perturbed, self.jssp.job_machine_dict)
@@ -86,12 +94,12 @@ class PSOOptimizer:
         attempts = 0
 
         while swaps_applied < num_swaps and attempts < MAX_ATTEMPTS:
-            i, j = random.sample(range(len(perturbed)), 2)
-            if perturbed[i][0] != perturbed[j][0]:
+            i, j = random.sample(range(len(perturbed)), 2) # choisit deux indices distincts i et j dans la solution perturbée. Cela permet de sélectionner deux positions de jobs à échanger.
+            if perturbed[i][0] != perturbed[j][0]: # Assure que les jobs sont différents
                 perturbed[i], perturbed[j] = perturbed[j], perturbed[i]
 
                 if self.is_sequence_valid(
-                    perturbed, perturbed[i][0]
+                    perturbed, perturbed[i][0] # Vérifie si la séquence perturbée est valide après l'échange pour l'id du job de la position i.
                 ) and self.is_sequence_valid(perturbed, perturbed[j][0]):
                     swaps_applied += 1
                 else:
@@ -130,11 +138,11 @@ class PSOOptimizer:
             current_w = w
             current_mutation = mutation_rate
             if adaptive_params:
-                current_w = w * (1 - iteration / max_iter) + MIN_W * (
+                current_w = w * (1 - iteration / max_iter) + MIN_W * ( # Inertia w : It starts high and decreases as the iteration progresses (to encourage exploration early and exploitation later).
                     iteration / max_iter
                 )
-                current_mutation = min(
-                    MAX_MUTATION, mutation_rate * (1 + self.stagnation_count / 10)
+                current_mutation = min( # If there’s more stagnation, the mutation rate increases, allowing more exploration.
+                    MAX_MUTATION, mutation_rate * (1 + self.stagnation_count / 10) 
                 )
 
             # Evaluate particles
@@ -162,17 +170,18 @@ class PSOOptimizer:
             # Update particles
             for particle in particles:
                 particle.update_velocity(
-                    global_best_position, current_w, c1, c2, mutation_rate
+                    global_best_position, current_w, c1, c2, mutation_rate # static mutation rate
                 )
                 particle.update_position()
-                particle.apply_mutation(current_mutation)
+                particle.apply_mutation(current_mutation) # dynamic changing mutation
 
             # Stagnation handling
-            if self.stagnation_count >= max_stagnation:
+            if self.stagnation_count >= max_stagnation: # If the stagnation count exceeds max_stagnation, meaning the swarm has not improved for a while
                 self.handle_stagnation(particles, global_best_position)
                 self.stagnation_count = 0
 
-            # Early stopping
+            # Early stopping : to terminate the algorithm if no significant improvement in fitness occurs over the last 
+            # early_stopping_window iterations. If the improvement is smaller than a certain threshold (improvement_threshold), the optimization stops early.
             if (
                 early_stopping_window
                 and len(self.makespan_history) >= early_stopping_window
