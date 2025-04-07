@@ -6,6 +6,11 @@ from src.modules.particle import Particle
 import math
 
 
+MIN_W = 0.2
+MAX_MUTATION = 0.6
+MAX_ATTEMPTS = 50
+
+
 class PSOOptimizer:
     """Enhanced PSO optimization process with stagnation handling."""
 
@@ -48,23 +53,6 @@ class PSOOptimizer:
 
         return diversity / len(particles)
 
-    def apply_mutation(self, particle: Particle, mutation_rate: float = 0.1):
-        """Apply mutation to a particle to maintain diversity."""
-        if random.random() < mutation_rate:
-            attempts = 0
-            while attempts < 10:
-                i, j = random.sample(range(len(particle.position)), 2)
-                if particle.position[i][0] != particle.position[j][0]:
-                    new_position = particle.position.copy()
-                    new_position[i], new_position[j] = new_position[j], new_position[i]
-
-                    if self.is_sequence_valid(
-                        new_position, new_position[i][0]
-                    ) and self.is_sequence_valid(new_position, new_position[j][0]):
-                        particle.position = new_position
-                        break
-                attempts += 1
-
     def is_sequence_valid(self, sequence: List[Tuple[int, int]], job_id: int) -> bool:
         """Check if operations for a job are in correct machine order."""
         job_ops = [op[1] for op in sequence if op[0] == job_id]
@@ -84,7 +72,9 @@ class PSOOptimizer:
             )
 
         # Add perturbed global best
-        perturbed = self.perturb_solution(global_best_position)
+        perturbed = self.perturb_solution(
+            global_best_position, max(len(global_best_position) // 5, 1)
+        )
         particles[-1] = Particle(perturbed, self.jssp.job_machine_dict)
 
     def perturb_solution(
@@ -95,7 +85,7 @@ class PSOOptimizer:
         swaps_applied = 0
         attempts = 0
 
-        while swaps_applied < num_swaps and attempts < 20:
+        while swaps_applied < num_swaps and attempts < MAX_ATTEMPTS:
             i, j = random.sample(range(len(perturbed)), 2)
             if perturbed[i][0] != perturbed[j][0]:
                 perturbed[i], perturbed[j] = perturbed[j], perturbed[i]
@@ -140,11 +130,11 @@ class PSOOptimizer:
             current_w = w
             current_mutation = mutation_rate
             if adaptive_params:
-                current_w = w * (1 - iteration / max_iter) + 0.4 * (
+                current_w = w * (1 - iteration / max_iter) + MIN_W * (
                     iteration / max_iter
                 )
                 current_mutation = min(
-                    0.5, mutation_rate * (1 + self.stagnation_count / 10)
+                    MAX_MUTATION, mutation_rate * (1 + self.stagnation_count / 10)
                 )
 
             # Evaluate particles
@@ -171,9 +161,11 @@ class PSOOptimizer:
 
             # Update particles
             for particle in particles:
-                particle.update_velocity(global_best_position, current_w, c1, c2)
+                particle.update_velocity(
+                    global_best_position, current_w, c1, c2, mutation_rate
+                )
                 particle.update_position()
-                self.apply_mutation(particle, current_mutation)
+                particle.apply_mutation(current_mutation)
 
             # Stagnation handling
             if self.stagnation_count >= max_stagnation:

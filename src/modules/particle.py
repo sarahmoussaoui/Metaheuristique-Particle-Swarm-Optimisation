@@ -3,6 +3,9 @@ from typing import List, Tuple
 import random
 
 
+MAX_ATTEMPTS_MUTATION = 50
+
+
 class Particle:
     """Represents a particle in the PSO algorithm with improved diversity mechanisms."""
 
@@ -18,7 +21,7 @@ class Particle:
         self.best_fitness = float("inf")
         self.fitness = float("inf")
         self.job_machine_dict = job_machine_dict
-        self.max_velocity_size = max_velocity_size or max(1, len(sequence) // 2)
+        self.max_velocity_size = max_velocity_size or max(1, len(sequence) * 2)
         self.initialize_velocity()
 
     def initialize_velocity(self):
@@ -78,7 +81,7 @@ class Particle:
                 applied_swaps += 1
 
         self.position = new_position
-        return applied_swaps  # Return number of successful swaps
+        return applied_swaps
 
     def update_velocity(
         self,
@@ -112,7 +115,7 @@ class Particle:
         # 2. Cognitive component (personal best)
         for i in range(len(self.position)):
             if (
-                random.random() < c1
+                random.random() < random.random() * c1
                 and len(new_velocity) < self.max_velocity_size
                 and self.position[i] != self.best_position[i]
             ):
@@ -128,7 +131,7 @@ class Particle:
         # 3. Social component (global best)
         for i in range(len(self.position)):
             if (
-                random.random() < c2
+                random.random() < random.random() * c2
                 and len(new_velocity) < self.max_velocity_size
                 and self.position[i] != global_best_position[i]
             ):
@@ -147,7 +150,10 @@ class Particle:
             and len(new_velocity) < self.max_velocity_size
         ):
             attempts = 0
-            while attempts < 10 and len(new_velocity) < self.max_velocity_size:
+            while (
+                attempts < MAX_ATTEMPTS_MUTATION
+                and len(new_velocity) < self.max_velocity_size
+            ):
                 i, j = random.sample(range(len(self.position)), 2)
                 if (
                     can_add_swap(i, j)
@@ -165,7 +171,7 @@ class Particle:
         """Apply additional mutation to escape local optima."""
         if random.random() < mutation_rate:
             attempts = 0
-            while attempts < 10:
+            while attempts < MAX_ATTEMPTS_MUTATION:
                 i, j = random.sample(range(len(self.position)), 2)
                 if self.position[i][0] != self.position[j][0]:
                     new_position = self.position.copy()
