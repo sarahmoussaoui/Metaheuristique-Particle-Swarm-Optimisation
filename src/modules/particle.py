@@ -32,7 +32,7 @@ class Particle:
 
         while len(self.velocity) < self.max_velocity_size and attempts < max_attempts:
             attempts += 1
-            i, j = random.sample(range(len(self.position)), 2)
+            i, j = random.sample(range(len(self.position)), 2) # tirer au hasard deux indices distincts dans la position actuelle d'une particule.
 
             # Skip if same job or invalid indices
             if self.position[i][0] == self.position[j][0]:
@@ -61,11 +61,11 @@ class Particle:
         applied_swaps = 0
 
         for i, j in self.velocity:
-            if i >= len(new_position) or j >= len(new_position):
-                continue
+            # if i >= len(new_position) or j >= len(new_position):
+            #     continue
 
-            if new_position[i][0] == new_position[j][0]:
-                continue
+            # if new_position[i][0] == new_position[j][0]:
+            #     continue
 
             # Perform swap
             new_position[i], new_position[j] = new_position[j], new_position[i]
@@ -121,7 +121,7 @@ class Particle:
             ):
 
                 try:
-                    j = self.best_position.index(self.position[i])
+                    j = self.best_position.index(self.position[i]) # Elle cherche où se trouve l’opération self.position[i] dans la meilleure position connue de la particule (self.best_position).
                     if can_add_swap(i, j):
                         new_velocity.append((i, j))
                         used_indices.update([i, j])
@@ -137,7 +137,7 @@ class Particle:
             ):
 
                 try:
-                    j = global_best_position.index(self.position[i])
+                    j = global_best_position.index(self.position[i]) # Elle cherche où se trouve l’opération self.position[i] dans la meilleure position connue du swarm 
                     if can_add_swap(i, j):
                         new_velocity.append((i, j))
                         used_indices.update([i, j])

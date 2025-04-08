@@ -2,7 +2,7 @@ import os
 from src.modules.jsspProcessor import JSSPProcessor
 
 if __name__ == "__main__":
-    dataset_folder = "./src/data/processed/data_30j_15m"
+    dataset_folder = "./src/data/processed/data_20j_15m"
 
     for filename in os.listdir(dataset_folder):
         if filename.endswith(".txt"):
