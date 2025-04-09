@@ -5,11 +5,11 @@ from src.modules.modelisation import JSSP
 from src.modules.particle import Particle
 import math
 
-
-MIN_W = 0.2
-MAX_MUTATION = 0.6
-MAX_ATTEMPTS = 50
-
+DIVERSITY_THRESHOLD = 0.1  # Threshold for diversity
+MIN_W = 0.2 # minimial number of iterations
+MAX_MUTATION = 0.8 # Maximum mutation rate
+MAX_ATTEMPTS = 100 # Maximum attempts for mutation
+STAGNATION = 4 # Number of particles to reinitialize when stagnating
 
 class PSOOptimizer:
     """Enhanced PSO optimization process with stagnation handling."""
@@ -61,6 +61,33 @@ class PSOOptimizer:
         # diversité moyenne 
         return diversity / len(particles)
 
+    # def calculate_diversity(self, particles: List[Particle]) -> float:
+    #     """Calcule la diversité de la population en utilisant la distance de Hamming.
+        
+    #     La distance de Hamming compte combien d'opérations sont à des positions différentes
+    #     entre deux particules. Plus la diversité moyenne est grande, plus la population est dispersée.
+    #     """
+    #     if not particles or len(particles) < 2:
+    #         return 0.0
+
+    #     total_distance = 0
+    #     count = 0
+
+    #     # Comparer chaque paire unique de particules
+    #     for i in range(len(particles)):
+    #         for j in range(i + 1, len(particles)):
+    #             pos1 = particles[i].position
+    #             pos2 = particles[j].position
+
+    #             # Hamming distance = nombre de différences entre les deux séquences
+    #             hamming = sum(op1 != op2 for op1, op2 in zip(pos1, pos2))
+    #             total_distance += hamming
+    #             count += 1
+
+    #     # Diversité moyenne
+    #     return total_distance / count
+
+
     def is_sequence_valid(self, sequence: List[Tuple[int, int]], job_id: int) -> bool:
         """Check if operations for a job are in correct machine order."""
         job_ops = [op[1] for op in sequence if op[0] == job_id]
@@ -72,7 +99,7 @@ class PSOOptimizer:
         """Diversification strategies when stagnating."""
         # Reinitialize worst particles
         particles.sort(key=lambda p: p.best_fitness)
-        num_to_reinit = max(1, len(particles) // 5)
+        num_to_reinit = max(1, len(particles) // STAGNATION) # On choisit un nombre de particules à réinitialiser basé sur le taux de stagnation.
 
         for i in range(-num_to_reinit, 0):
             particles[i] = Particle(
@@ -142,8 +169,8 @@ class PSOOptimizer:
                     iteration / max_iter
                 )
                 current_mutation = min( # If there’s more stagnation, the mutation rate increases, allowing more exploration.
-                    MAX_MUTATION, mutation_rate * (1 + self.stagnation_count / 10) 
-                )
+                    MAX_MUTATION, mutation_rate * (1 + self.stagnation_count / 10)  # nsures that the mutation rate doesn’t exceed MAX_MUTATION, so the algorithm doesn't go too random.
+                ) 
 
             # Evaluate particles
             improved = False
@@ -180,13 +207,25 @@ class PSOOptimizer:
                 self.handle_stagnation(particles, global_best_position)
                 self.stagnation_count = 0
 
+            # diversity = self.calculate_diversity(particles)
+            # self.diversity_history.append(diversity)
+
+            # if diversity < DIVERSITY_THRESHOLD * len(particles[0].position): # If the diversity is below a certain threshold, indicating that the particles are converging too closely together.
+            #     print(f"Low diversity detected at iteration {iteration}, triggering diversification...")
+            #     self.handle_stagnation(particles, global_best_position)
+            #     self.stagnation_count = 0
+
+
+
             # Early stopping : to terminate the algorithm if no significant improvement in fitness occurs over the last 
             # early_stopping_window iterations. If the improvement is smaller than a certain threshold (improvement_threshold), the optimization stops early.
             if (
                 early_stopping_window
-                and len(self.makespan_history) >= early_stopping_window
+                and len(self.makespan_history) >= early_stopping_window # On attend d’avoir accumulé au moins early_stopping_window itérations pour faire cette vérification.
             ):
-                window_min = min(self.makespan_history[-early_stopping_window:])
+                window_min = min(self.makespan_history[-early_stopping_window:]) # On regarde la meilleure valeur de fitness dans la fenêtre d’arrêt précoce.
+                # On compare la différence entre la meilleure valeur de fitness globale et la meilleure valeur de fitness dans la fenêtre d’arrêt précoce.
+                # Si cette différence est inférieure à un certain seuil (improvement_threshold), on arrête l’optimisation.
                 if (
                     global_best_fitness - window_min
                 ) < improvement_threshold * global_best_fitness:
