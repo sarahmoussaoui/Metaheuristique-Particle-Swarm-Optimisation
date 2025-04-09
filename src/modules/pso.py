@@ -15,9 +15,7 @@ class PSOOptimizer:
 
     def generate_random_initial_sequence(self) -> List[Tuple[int, int]]:
         """Generates a valid initial sequence preserving operation order within jobs."""
-
         remaining_ops = deepcopy(self.jssp.job_machine_dict)
-
         sequence = []
 
         while any(remaining_ops.values()):
@@ -28,12 +26,44 @@ class PSOOptimizer:
 
         return sequence
     
+    def mutate_sequence(self, sequence: List[Tuple[int, int]], mutation_rate: float = 0.3) -> List[Tuple[int, int]]:
+        """
+        Mutates a sequence by swapping operations while preserving job operation order.
+        
+        Args:
+            sequence: The original sequence to mutate
+            mutation_rate: Probability of each operation being involved in a swap
+            
+        Returns:
+            A new mutated sequence
+        """
+        if len(sequence) < 2:
+            return deepcopy(sequence)
+            
+        mutated = deepcopy(sequence)
+        
+        # Find all possible swap positions where operations are from different jobs
+        swap_candidates = []
+        for i in range(len(mutated)):
+            for j in range(i+1, len(mutated)):
+                if mutated[i][0] != mutated[j][0]:  # Only swap operations from different jobs
+                    swap_candidates.append((i, j))
+        
+        if not swap_candidates:
+            return mutated
+            
+        # Apply mutations
+        for _ in range(int(mutation_rate * len(sequence))):
+            if random.random() < mutation_rate and swap_candidates:
+                i, j = random.choice(swap_candidates)
+                mutated[i], mutated[j] = mutated[j], mutated[i]
+                
+        return mutated
 
     def generate_spt_initial_sequence(self) -> List[Tuple[int, int]]:
         """ Generates an initial sequence using Shortest Processing Time (SPT) rule.
         Prioritizes operations with the shortest processing times while preserving job operation order.
         """
-        
         # Create a list of all operations with their job, op index, and processing time
         all_ops = []
         for job_idx in self.jssp.job_machine_dict:
@@ -56,7 +86,6 @@ class PSOOptimizer:
                 next_op_for_job[job_idx] += 1
         
         # Add any remaining operations that couldn't be added in SPT order
-        # (due to operation ordering constraints)
         for job_idx in next_op_for_job:
             while next_op_for_job[job_idx] < len(self.jssp.job_machine_dict[job_idx]):
                 sequence.append((job_idx, next_op_for_job[job_idx]))
@@ -71,20 +100,25 @@ class PSOOptimizer:
         w: float = 0.7,
         c1: float = 1.5,
         c2: float = 1.5,
-        use_spt=False
+        use_spt=False,
+        spt_mutation_rate: float = 0.2
     ):
         """Run the PSO optimization."""
         particles = []
         global_best_position = None
         global_best_fitness = float("inf")
 
-        for _ in range(num_particles):
-            if use_spt and _ == 0:  # Use SPT for the first particle
+        for i in range(num_particles):
+            if use_spt and i == 0:  # Use SPT for the first particle
                 sequence = self.generate_spt_initial_sequence()
+            elif use_spt:
+                # For other particles, use mutated versions of the SPT sequence
+                base_sequence = self.generate_spt_initial_sequence()
+                sequence = self.mutate_sequence(base_sequence, spt_mutation_rate)
             else:
                 sequence = self.generate_random_initial_sequence()
+                
             particles.append(Particle(sequence, self.jssp.job_machine_dict))
-
 
         for iteration in range(max_iter):
             # Evaluation phase

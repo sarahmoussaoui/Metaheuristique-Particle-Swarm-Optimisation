@@ -27,7 +27,8 @@ class JSSPProcessor:
         w: float = 0.7,
         c1: float = 1.5,
         c2: float = 1.5,
-        use_spt: bool = False
+        use_spt: bool = False,
+        spt_mutation_rate: float = 0.2  # Nouveau paramètre
     ):
         with open(self.dataset_path, "r") as file:
             dataset_str = file.read()
@@ -47,8 +48,11 @@ class JSSPProcessor:
             w=w,
             c1=c1,
             c2=c2,
+            use_spt=use_spt,
+            spt_mutation_rate=spt_mutation_rate  # Paramètre transmis
         )
         exec_time = time.time() - start_time
+        
         if self.plot:
             ScheduleVisualizer.plot_convergence(
                 optimizer.iteration_history,
@@ -56,7 +60,11 @@ class JSSPProcessor:
                 upper_bound=upper_bound,
                 save_folder=self.output_dir,
             )
-            ScheduleVisualizer.plot_gantt_chart(jssp, save_folder=self.output_dir)
+            ScheduleVisualizer.plot_gantt_chart(
+                best_schedule,  # Ajout de best_schedule si nécessaire
+                jssp, 
+                save_folder=self.output_dir
+            )
 
             self._log_results(best_makespan, exec_time)
 
