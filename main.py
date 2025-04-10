@@ -15,7 +15,7 @@ if __name__ == "__main__":
                 c1=0.9,
                 c2=0.8,
                 adaptive_params=True,
-                mutation_rate=0.5,
+                mutation_rate=0.,
                 max_stagnation=50,
                 early_stopping_window=None,
                 improvement_threshold=0.01,
