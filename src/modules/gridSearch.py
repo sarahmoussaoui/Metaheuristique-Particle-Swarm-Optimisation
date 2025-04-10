@@ -27,9 +27,12 @@ class PSOGridSearch:
             "exec_time",
             "num_particles",
             "max_iter",
-            "w",
-            "c1",
-            "c2",
+            "w_min",
+            "w_max",
+            "c1_min",
+            "c1_max",
+            "c2_min",
+            "c2_max",
             "mutation_rate",
             "max_stagnation",
             "early_stopping_window",
@@ -40,13 +43,13 @@ class PSOGridSearch:
         # Initialize CSV file (append if exists, create with header if not)
         self._initialize_csv_file()
 
-        # Parameter grid
+        # Parameter grid with tuple ranges for w, c1, c2
         self.param_grid = {
             "num_particles": [20, 30, 50],
             "max_iter": [200, 500],
-            "w": [0.3, 0.5, 0.8, 0.9],
-            "c1": [0.4, 0.7, 0.9],
-            "c2": [0.4, 0.7, 0.9],
+            "w": [(0.3, 0.8), (0.5, 0.9)],  # (min, max) tuples
+            "c1": [(0.2, 1.7), (0.4, 1.5)],  # (min, max) tuples
+            "c2": [(0.2, 1.7), (0.4, 1.5)],  # (min, max) tuples
             "mutation_rate": [0.5, 0.3],
             "max_stagnation": [20],
             "early_stopping_window": [None],
@@ -70,7 +73,14 @@ class PSOGridSearch:
                 writer.writeheader()
 
     def set_parameter_grid(self, grid: Dict[str, Union[List[Any], Any]]) -> None:
+        """Set the parameter grid, ensuring tuple format for w, c1, c2."""
         self.param_grid = grid
+        # Validate the tuple parameters
+        for param in ["w", "c1", "c2"]:
+            if param in grid:
+                for value in grid[param]:
+                    if not isinstance(value, tuple) or len(value) != 2:
+                        raise ValueError(f"{param} values must be (min, max) tuples")
 
     def generate_parameter_combinations(self) -> List[Dict[str, Any]]:
         sampled_params = {}
@@ -83,11 +93,37 @@ class PSOGridSearch:
 
         param_names = sampled_params.keys()
         value_combinations = product(*sampled_params.values())
-        return [dict(zip(param_names, combo)) for combo in value_combinations]
+
+        # Convert tuple parameters to separate min/max fields in the dict
+        combinations = []
+        for combo in value_combinations:
+            param_dict = dict(zip(param_names, combo))
+            # Expand the tuple parameters
+            for param in ["w", "c1", "c2"]:
+                if param in param_dict:
+                    min_val, max_val = param_dict[param]
+                    param_dict[f"{param}_min"] = min_val
+                    param_dict[f"{param}_max"] = max_val
+                    del param_dict[param]
+            combinations.append(param_dict)
+
+        return combinations
 
     def evaluate_parameter_set(self, params: Dict[str, Any]) -> Tuple[float, float]:
+        """Evaluate a parameter set, handling the tuple parameters."""
+        # Convert the separate min/max fields back to tuples for the PSO
+        pso_params = params.copy()
+        for param in ["w", "c1", "c2"]:
+            if f"{param}_min" in pso_params and f"{param}_max" in pso_params:
+                pso_params[param] = (
+                    pso_params[f"{param}_min"],
+                    pso_params[f"{param}_max"],
+                )
+                del pso_params[f"{param}_min"]
+                del pso_params[f"{param}_max"]
+
         processor = JSSPProcessor(dataset_path=self.dataset_file, plot=False)
-        _, makespan, exec_time = processor.run(**params)
+        _, makespan, exec_time = processor.run(**pso_params)
         return makespan, exec_time
 
     def run_search(self) -> Dict[str, Any]:
@@ -158,8 +194,19 @@ class PSOGridSearch:
         best_makespan: float,
         best_exec_time: float,
     ) -> None:
+        # Convert the separate min/max fields back to tuples for storage
+        stored_params = best_params.copy()
+        for param in ["w", "c1", "c2"]:
+            if f"{param}_min" in stored_params and f"{param}_max" in stored_params:
+                stored_params[param] = (
+                    stored_params[f"{param}_min"],
+                    stored_params[f"{param}_max"],
+                )
+                del stored_params[f"{param}_min"]
+                del stored_params[f"{param}_max"]
+
         result = {
-            "best_parameters": best_params,
+            "best_parameters": stored_params,
             "makespan": best_makespan,
             "execution_time": best_exec_time,
             "timestamp": datetime.now().isoformat(),
@@ -178,8 +225,19 @@ class PSOGridSearch:
         best_makespan: float,
         best_exec_time: float,
     ) -> Dict[str, Any]:
+        # Convert the separate min/max fields back to tuples for the final output
+        stored_params = best_params.copy()
+        for param in ["w", "c1", "c2"]:
+            if f"{param}_min" in stored_params and f"{param}_max" in stored_params:
+                stored_params[param] = (
+                    stored_params[f"{param}_min"],
+                    stored_params[f"{param}_max"],
+                )
+                del stored_params[f"{param}_min"]
+                del stored_params[f"{param}_max"]
+
         return {
-            "best_parameters": best_params,
+            "best_parameters": stored_params,
             "makespan": best_makespan,
             "execution_time": best_exec_time,
             "search_history_file": self.history_output_file,

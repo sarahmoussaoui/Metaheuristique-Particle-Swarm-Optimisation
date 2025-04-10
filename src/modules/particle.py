@@ -1,18 +1,20 @@
 from copy import deepcopy
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import random
-
+import numpy as np
+import math
+from collections import defaultdict
 
 MAX_ATTEMPTS_MUTATION = 50
 
 
 class Particle:
-    """Represents a particle in the PSO algorithm with improved diversity mechanisms."""
+    """Enhanced Particle with improved exploration capabilities."""
 
     def __init__(
         self,
         sequence: List[Tuple[int, int]],
-        job_machine_dict: dict[int, list[int]],
+        job_machine_dict: Dict[int, List[int]],
         max_velocity_size: int = None,
         random_seed: int = None,
     ):
@@ -22,35 +24,26 @@ class Particle:
         self.best_fitness = float("inf")
         self.fitness = float("inf")
         self.job_machine_dict = job_machine_dict
-        self.max_velocity_size = max_velocity_size or max(1, len(sequence) * 2)
-        self.random_seed = random_seed
+        self.max_velocity_size = max_velocity_size or max(5, len(sequence) // 2)
+        self.rng = random.Random(random_seed) if random_seed else random.Random()
 
-        if random_seed is not None:
-            random.seed(random_seed)
         self.initialize_velocity()
 
     def initialize_velocity(self):
-        """Initialize velocity with random swaps that respect constraints."""
+        """Initialize velocity with diverse valid swaps."""
         self.velocity = []
-        attempts = 0
-        max_attempts = 100
+        valid_swaps = []
 
-        while len(self.velocity) < self.max_velocity_size and attempts < max_attempts:
-            attempts += 1
-            i, j = random.sample(range(len(self.position)), 2)
+        # Generate all possible valid swaps
+        for i in range(len(self.position)):
+            for j in range(i + 1, len(self.position)):
+                if self.position[i][0] != self.position[j][0]:
+                    valid_swaps.append((i, j))
 
-            # Skip if same job or invalid indices
-            if self.position[i][0] == self.position[j][0]:
-                continue
-
-            # Check if swap would maintain valid machine order
-            temp_position = self.position.copy()
-            temp_position[i], temp_position[j] = temp_position[j], temp_position[i]
-
-            if self.is_machine_order_valid(
-                temp_position, temp_position[i][0]
-            ) and self.is_machine_order_valid(temp_position, temp_position[j][0]):
-                self.velocity.append((i, j))
+        # Sample without replacement if enough swaps exist
+        if valid_swaps:
+            num_swaps = min(self.max_velocity_size, len(valid_swaps))
+            self.velocity = self.rng.sample(valid_swaps, num_swaps)
 
     def is_machine_order_valid(
         self, position: List[Tuple[int, int]], job_id: int
@@ -60,7 +53,7 @@ class Particle:
         correct_order = self.job_machine_dict[job_id]
         return machines_in_position == correct_order
 
-    def update_position(self):
+    def update_position(self) -> int:
         """Update position by applying velocity with repair mechanism."""
         new_position = deepcopy(self.position)
         applied_swaps = 0
@@ -89,11 +82,11 @@ class Particle:
         c2: float,
         mutation_rate: float = 0.1,
     ):
-        """Update velocity with enhanced diversity mechanisms."""
+        """Update velocity with enhanced exploration."""
         new_velocity = []
         used_indices = set()
 
-        # Helper function to check if swap can be added
+        # Helper to check if swap can be added
         def can_add_swap(i, j):
             return (
                 i != j
@@ -103,41 +96,48 @@ class Particle:
             )
 
         # 1. Inertia component (keep some existing swaps)
-        r = random.random()
-        r1 = random.random()
-        r2 = random.random()
         for swap in self.velocity:
-            if r < w and len(new_velocity) < self.max_velocity_size:
+            if self.rng.random() < w and len(new_velocity) < self.max_velocity_size:
                 i, j = swap
                 if can_add_swap(i, j):
                     new_velocity.append(swap)
                     used_indices.update([i, j])
 
         # 2. Cognitive component (personal best)
-        for i in range(len(self.position)):
-            if (
-                r1 < c1
-                and len(new_velocity) < self.max_velocity_size
-                and self.position[i] != self.best_position[i]
-            ):
+        diff_indices = [
+            i
+            for i in range(len(self.position))
+            if self.position[i] != self.best_position[i]
+        ]
+
+        if diff_indices and self.rng.random() < c1:
+            for i in self.rng.sample(diff_indices, min(3, len(diff_indices))):
                 try:
                     j = self.best_position.index(self.position[i])
-                    if can_add_swap(i, j):
+                    if (
+                        can_add_swap(i, j)
+                        and len(new_velocity) < self.max_velocity_size
+                    ):
                         new_velocity.append((i, j))
                         used_indices.update([i, j])
                 except ValueError:
                     pass
 
         # 3. Social component (global best)
-        for i in range(len(self.position)):
-            if (
-                r2 < c2
-                and len(new_velocity) < self.max_velocity_size
-                and self.position[i] != global_best_position[i]
-            ):
+        diff_indices = [
+            i
+            for i in range(len(self.position))
+            if self.position[i] != global_best_position[i]
+        ]
+
+        if diff_indices and self.rng.random() < c2:
+            for i in self.rng.sample(diff_indices, min(3, len(diff_indices))):
                 try:
                     j = global_best_position.index(self.position[i])
-                    if can_add_swap(i, j):
+                    if (
+                        can_add_swap(i, j)
+                        and len(new_velocity) < self.max_velocity_size
+                    ):
                         new_velocity.append((i, j))
                         used_indices.update([i, j])
                 except ValueError:
@@ -145,7 +145,7 @@ class Particle:
 
         # 4. Mutation component
         if (
-            random.random() < mutation_rate
+            self.rng.random() < mutation_rate
             and len(new_velocity) < self.max_velocity_size
         ):
             attempts = 0
@@ -153,7 +153,7 @@ class Particle:
                 attempts < MAX_ATTEMPTS_MUTATION
                 and len(new_velocity) < self.max_velocity_size
             ):
-                i, j = random.sample(range(len(self.position)), 2)
+                i, j = self.rng.sample(range(len(self.position)), 2)
                 if (
                     can_add_swap(i, j)
                     and (i, j) not in new_velocity
@@ -167,40 +167,56 @@ class Particle:
         self.velocity = new_velocity[: self.max_velocity_size]
 
     def apply_mutation(self, mutation_rate=0.1):
-        if random.random() < mutation_rate:
-            # Try block swaps (more powerful than single swaps)
-            if random.random() < 0.3:  # 30% chance for block mutation
-                block_size = random.randint(2, min(5, len(self.position) // 4))
-                start = random.randint(0, len(self.position) - block_size)
+        """Enhanced mutation with more diverse operations."""
+        if self.rng.random() < mutation_rate:
+            # 50% chance for block mutation
+            if self.rng.random() < 0.5:
+                block_size = self.rng.randint(2, min(10, len(self.position) // 3))
+                start = self.rng.randint(0, len(self.position) - block_size)
                 end = start + block_size
+
+                # Extract block and group by job
+                block = self.position[start:end]
+                job_ops = defaultdict(list)
+                for op in block:
+                    job_ops[op[0]].append(op[1])
+
+                # Validate block can be shuffled
                 valid = True
-                for i in range(start, end):
-                    for j in range(i + 1, end):
-                        if self.position[i][0] == self.position[j][0]:
-                            valid = False
-                            break
-                    if not valid:
+                for job, ops in job_ops.items():
+                    if ops != self.job_machine_dict[job][: len(ops)]:
+                        valid = False
                         break
 
                 if valid:
-                    # Reverse the block
-                    self.position[start:end] = self.position[start:end][::-1]
+                    # Shuffle jobs while maintaining internal order
+                    jobs = list(job_ops.keys())
+                    self.rng.shuffle(jobs)
+
+                    # Rebuild block
+                    new_block = []
+                    for job in jobs:
+                        new_block.extend((job, op) for op in job_ops[job])
+
+                    self.position[start:end] = new_block
             else:
-                # Standard swap mutation
-                attempts = 0
-                while attempts < MAX_ATTEMPTS_MUTATION:
-                    i, j = random.sample(range(len(self.position)), 2)
-                    if self.position[i][0] != self.position[j][0]:
-                        new_position = self.position.copy()
-                        new_position[i], new_position[j] = (
-                            new_position[j],
-                            new_position[i],
-                        )
-                        if self.is_machine_order_valid(
-                            new_position, new_position[i][0]
-                        ) and self.is_machine_order_valid(
-                            new_position, new_position[j][0]
-                        ):
-                            self.position = new_position
-                            break
-                    attempts += 1
+                # Multiple swaps mutation
+                num_swaps = self.rng.randint(1, 3)
+                for _ in range(num_swaps):
+                    attempts = 0
+                    while attempts < MAX_ATTEMPTS_MUTATION:
+                        i, j = self.rng.sample(range(len(self.position)), 2)
+                        if self.position[i][0] != self.position[j][0]:
+                            new_position = self.position.copy()
+                            new_position[i], new_position[j] = (
+                                new_position[j],
+                                new_position[i],
+                            )
+                            if self.is_machine_order_valid(
+                                new_position, new_position[i][0]
+                            ) and self.is_machine_order_valid(
+                                new_position, new_position[j][0]
+                            ):
+                                self.position = new_position
+                                break
+                        attempts += 1
