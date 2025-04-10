@@ -10,8 +10,8 @@ if __name__ == "__main__":
             processor = JSSPProcessor(dataset_path)
             best_schedule, best_makespan, exec_time = processor.run(
                 num_particles=30,
-                max_iter=200,
-                w=0.9,
+                max_iter=500,
+                w=0.7,
                 c1=0.9,
                 c2=0.8,
                 adaptive_params=True,

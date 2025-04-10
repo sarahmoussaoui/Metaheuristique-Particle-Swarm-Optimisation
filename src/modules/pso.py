@@ -126,13 +126,14 @@ class PSOOptimizer:
             particles[i] = Particle(
                 self.generate_initial_sequence(),
                 self.jssp.job_machine_dict,
+                random_seed=i,
             )
 
         # Add perturbed global best
         perturbed = self.perturb_solution(
             global_best_position, max(len(global_best_position) // 5, 1)
         )
-        particles[-1] = Particle(perturbed, self.jssp.job_machine_dict)
+        particles[-1] = Particle(perturbed, self.jssp.job_machine_dict, random_seed=80)
         random.seed(self.random_seed)  # Reset to main seed
 
     def perturb_solution(

@@ -166,19 +166,41 @@ class Particle:
 
         self.velocity = new_velocity[: self.max_velocity_size]
 
-    def apply_mutation(self, mutation_rate: float = 0.1):
-        """Apply additional mutation to escape local optima."""
+    def apply_mutation(self, mutation_rate=0.1):
         if random.random() < mutation_rate:
-            attempts = 0
-            while attempts < MAX_ATTEMPTS_MUTATION:
-                i, j = random.sample(range(len(self.position)), 2)
-                if self.position[i][0] != self.position[j][0]:
-                    new_position = self.position.copy()
-                    new_position[i], new_position[j] = new_position[j], new_position[i]
-
-                    if self.is_machine_order_valid(
-                        new_position, new_position[i][0]
-                    ) and self.is_machine_order_valid(new_position, new_position[j][0]):
-                        self.position = new_position
+            # Try block swaps (more powerful than single swaps)
+            if random.random() < 0.3:  # 30% chance for block mutation
+                block_size = random.randint(2, min(5, len(self.position) // 4))
+                start = random.randint(0, len(self.position) - block_size)
+                end = start + block_size
+                valid = True
+                for i in range(start, end):
+                    for j in range(i + 1, end):
+                        if self.position[i][0] == self.position[j][0]:
+                            valid = False
+                            break
+                    if not valid:
                         break
-                attempts += 1
+
+                if valid:
+                    # Reverse the block
+                    self.position[start:end] = self.position[start:end][::-1]
+            else:
+                # Standard swap mutation
+                attempts = 0
+                while attempts < MAX_ATTEMPTS_MUTATION:
+                    i, j = random.sample(range(len(self.position)), 2)
+                    if self.position[i][0] != self.position[j][0]:
+                        new_position = self.position.copy()
+                        new_position[i], new_position[j] = (
+                            new_position[j],
+                            new_position[i],
+                        )
+                        if self.is_machine_order_valid(
+                            new_position, new_position[i][0]
+                        ) and self.is_machine_order_valid(
+                            new_position, new_position[j][0]
+                        ):
+                            self.position = new_position
+                            break
+                    attempts += 1
