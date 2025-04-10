@@ -14,6 +14,7 @@ class Particle:
         sequence: List[Tuple[int, int]],
         job_machine_dict: dict[int, list[int]],
         max_velocity_size: int = None,
+        random_seed: int = None,
     ):
         self.position = sequence
         self.velocity = []
@@ -22,6 +23,10 @@ class Particle:
         self.fitness = float("inf")
         self.job_machine_dict = job_machine_dict
         self.max_velocity_size = max_velocity_size or max(1, len(sequence) * 2)
+        self.random_seed = random_seed
+
+        if random_seed is not None:
+            random.seed(random_seed)
         self.initialize_velocity()
 
     def initialize_velocity(self):
@@ -32,7 +37,7 @@ class Particle:
 
         while len(self.velocity) < self.max_velocity_size and attempts < max_attempts:
             attempts += 1
-            i, j = random.sample(range(len(self.position)), 2) # tirer au hasard deux indices distincts dans la position actuelle d'une particule.
+            i, j = random.sample(range(len(self.position)), 2)
 
             # Skip if same job or invalid indices
             if self.position[i][0] == self.position[j][0]:
@@ -61,13 +66,6 @@ class Particle:
         applied_swaps = 0
 
         for i, j in self.velocity:
-            # if i >= len(new_position) or j >= len(new_position):
-            #     continue
-
-            # if new_position[i][0] == new_position[j][0]:
-            #     continue
-
-            # Perform swap
             new_position[i], new_position[j] = new_position[j], new_position[i]
 
             # Check constraints
@@ -86,9 +84,9 @@ class Particle:
     def update_velocity(
         self,
         global_best_position: List[Tuple[int, int]],
-        w: float,  # inertia weight
-        c1: float,  # cognitive weight
-        c2: float,  # social weight
+        w: float,
+        c1: float,
+        c2: float,
         mutation_rate: float = 0.1,
     ):
         """Update velocity with enhanced diversity mechanisms."""
@@ -105,8 +103,11 @@ class Particle:
             )
 
         # 1. Inertia component (keep some existing swaps)
+        r = random.random()
+        r1 = random.random()
+        r2 = random.random()
         for swap in self.velocity:
-            if random.random() < w and len(new_velocity) < self.max_velocity_size:
+            if r < w and len(new_velocity) < self.max_velocity_size:
                 i, j = swap
                 if can_add_swap(i, j):
                     new_velocity.append(swap)
@@ -115,13 +116,12 @@ class Particle:
         # 2. Cognitive component (personal best)
         for i in range(len(self.position)):
             if (
-                random.random() < random.random() * c1
+                r1 < c1
                 and len(new_velocity) < self.max_velocity_size
                 and self.position[i] != self.best_position[i]
             ):
-
                 try:
-                    j = self.best_position.index(self.position[i]) # Elle cherche où se trouve l’opération self.position[i] dans la meilleure position connue de la particule (self.best_position).
+                    j = self.best_position.index(self.position[i])
                     if can_add_swap(i, j):
                         new_velocity.append((i, j))
                         used_indices.update([i, j])
@@ -131,13 +131,12 @@ class Particle:
         # 3. Social component (global best)
         for i in range(len(self.position)):
             if (
-                random.random() < random.random() * c2
+                r2 < c2
                 and len(new_velocity) < self.max_velocity_size
                 and self.position[i] != global_best_position[i]
             ):
-
                 try:
-                    j = global_best_position.index(self.position[i]) # Elle cherche où se trouve l’opération self.position[i] dans la meilleure position connue du swarm 
+                    j = global_best_position.index(self.position[i])
                     if can_add_swap(i, j):
                         new_velocity.append((i, j))
                         used_indices.update([i, j])
@@ -165,7 +164,7 @@ class Particle:
                     break
                 attempts += 1
 
-        self.velocity = new_velocity[: self.max_velocity_size]  # Enforce size limit
+        self.velocity = new_velocity[: self.max_velocity_size]
 
     def apply_mutation(self, mutation_rate: float = 0.1):
         """Apply additional mutation to escape local optima."""
