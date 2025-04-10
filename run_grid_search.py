@@ -3,7 +3,7 @@ from src.modules.gridSearch import PSOGridSearch
 
 def main():
     # Configuration
-    dataset_file = "src/data/processed/data_50j_15m/data_100j_20m_1.txt"  # Folder containing your JSSP instance files
+    dataset_file = "src/data/processed/data_100j_20m/data_100j_20m_1.txt"  # Folder containing your JSSP instance files
     output_params = "SPSO/paramaters/best_params_grid_100j_20m_1.json"  # Output file for best parameters
     output_history = "SPSO/paramaters/search_history_grid_100j_20m_1.csv"  # Output file for search history
 
@@ -17,13 +17,13 @@ def main():
     # Optional: Customize parameter grid if needed
     grid_search.set_parameter_grid(
         {
-            "num_particles": [100, 150, 200],
-            "max_iter": [1000],
-            "w": [(0.2, 0.8), (0.4, 0.9)],  # (min, max) tuples
-            "c1": [(0.2, 0.9), (0.4, 0.9)],  # (min, max) tuples
-            "c2": [(0.2, 0.8), (0.3, 0.7)],  # (min, max) tuples
-            "mutation_rate": [0.5, 0.7],
-            "max_stagnation": [20],
+            "num_particles": [80, 100, 150],
+            "max_iter": [800],
+            "w": [(0.2, 0.9)],  # (min, max) tuples
+            "c1": [(0.3, 0.9)],  # (min, max) tuples
+            "c2": [(0.2, 0.8)],  # (min, max) tuples
+            "mutation_rate": [0.7],
+            "max_stagnation": [30],
             "early_stopping_window": [None],
             "improvement_threshold": [0.05],
         }
