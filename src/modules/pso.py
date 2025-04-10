@@ -61,32 +61,6 @@ class PSOOptimizer:
         # diversité moyenne 
         return diversity / len(particles)
 
-    # def calculate_diversity(self, particles: List[Particle]) -> float:
-    #     """Calcule la diversité de la population en utilisant la distance de Hamming.
-        
-    #     La distance de Hamming compte combien d'opérations sont à des positions différentes
-    #     entre deux particules. Plus la diversité moyenne est grande, plus la population est dispersée.
-    #     """
-    #     if not particles or len(particles) < 2:
-    #         return 0.0
-
-    #     total_distance = 0
-    #     count = 0
-
-    #     # Comparer chaque paire unique de particules
-    #     for i in range(len(particles)):
-    #         for j in range(i + 1, len(particles)):
-    #             pos1 = particles[i].position
-    #             pos2 = particles[j].position
-
-    #             # Hamming distance = nombre de différences entre les deux séquences
-    #             hamming = sum(op1 != op2 for op1, op2 in zip(pos1, pos2))
-    #             total_distance += hamming
-    #             count += 1
-
-    #     # Diversité moyenne
-    #     return total_distance / count
-
 
     def is_sequence_valid(self, sequence: List[Tuple[int, int]], job_id: int) -> bool:
         """Check if operations for a job are in correct machine order."""
@@ -206,15 +180,6 @@ class PSOOptimizer:
             if self.stagnation_count >= max_stagnation: # If the stagnation count exceeds max_stagnation, meaning the swarm has not improved for a while
                 self.handle_stagnation(particles, global_best_position)
                 self.stagnation_count = 0
-
-            # diversity = self.calculate_diversity(particles)
-            # self.diversity_history.append(diversity)
-
-            # if diversity < DIVERSITY_THRESHOLD * len(particles[0].position): # If the diversity is below a certain threshold, indicating that the particles are converging too closely together.
-            #     print(f"Low diversity detected at iteration {iteration}, triggering diversification...")
-            #     self.handle_stagnation(particles, global_best_position)
-            #     self.stagnation_count = 0
-
 
 
             # Early stopping : to terminate the algorithm if no significant improvement in fitness occurs over the last 
