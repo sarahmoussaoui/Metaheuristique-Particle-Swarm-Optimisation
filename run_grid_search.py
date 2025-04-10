@@ -17,15 +17,15 @@ def main():
     # Optional: Customize parameter grid if needed
     grid_search.set_parameter_grid(
         {
-            "num_particles": [80, 100, 150],
-            "max_iter": [800],
-            "w": [(0.2, 0.9)],  # (min, max) tuples
-            "c1": [(0.3, 0.9)],  # (min, max) tuples
-            "c2": [(0.2, 0.8)],  # (min, max) tuples
+            "num_particles": [50, 70, 90],
+            "max_iter": [1000],
+            "w": [(0.2, 0.9), (0.3, 0.8)],  # (min, max) tuples
+            "c1": [(0.3, 0.9), (0.5, 0.9)],  # (min, max) tuples
+            "c2": [(0.2, 0.8), (0.4, 0.8)],  # (min, max) tuples
             "mutation_rate": [0.7],
-            "max_stagnation": [30],
+            "max_stagnation": [20],
             "early_stopping_window": [None],
-            "improvement_threshold": [0.05],
+            "improvement_threshold": [0.01],
         }
     )
     # Optional: Customize parameter grid if needed
