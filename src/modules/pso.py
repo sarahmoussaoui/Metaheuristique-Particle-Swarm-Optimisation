@@ -8,11 +8,11 @@ from src.modules.particle import Particle
 
 MAX_ATTEMPTS_MUTATION = 100
 DIVERSITY_THRESHOLD = 0.2
-MAX_MUTATION = 0.9
+MAX_MUTATION = 0.75
 STAGNATION_THRESHOLD = 15
 EARLY_STOPPING_WINDOW = 25
 IMPROVEMENT_THRESHOLD = 0.005
-C_MAX = 1.7  # Changed to be the max value for c1 and c2
+C_MAX = 1
 C_MIN = 0.2
 W_MAX = 0.8
 W_MIN = 0.3
@@ -28,9 +28,13 @@ class PSOOptimizer:
         self.diversity_history = []
         self.stagnation_count = 0
         self.random_seed = random_seed
-        self.rng = random.Random(random_seed)
-        np.random.seed(random_seed)
+        self.seed_counter = 0  # Counter to generate unique seeds for each operation
         self.max_possible_diversity = None
+
+    def get_next_seed(self):
+        """Generate a unique seed for each random operation."""
+        self.seed_counter += 1
+        return self.random_seed + self.seed_counter
 
     def calculate_max_possible_diversity(self, num_particles: int) -> float:
         """Calculate theoretical maximum diversity for deterministic adaptation."""
@@ -57,6 +61,9 @@ class PSOOptimizer:
                     machine = self.jssp.jobs[job].operations[op_idx].machine
                     pt = self.jssp.jobs[job].operations[op_idx].processing_time
                     available.append((job, op_idx, machine, pt))
+
+            # Create RNG with unique seed for this operation
+            rng = random.Random(self.get_next_seed())
 
             clusters = []
             current_cluster = []
@@ -121,12 +128,15 @@ class PSOOptimizer:
         self, particles: List[Particle], global_best_position: List[Tuple[int, int]]
     ):
         """Diversification strategy for stagnation handling."""
+        # Create RNG with unique seed for this operation
+        rng = random.Random(self.get_next_seed())
+
         particles.sort(key=lambda p: p.best_fitness)
         num_to_replace = max(1, len(particles) // 4)
 
         for i in range(-num_to_replace, 0):
-            if self.rng.random() < 0.7:
-                new_seed = self.random_seed + len(particles) + i + 1
+            if rng.random() < 0.7:
+                new_seed = self.get_next_seed()
                 particles[i] = Particle(
                     self.generate_initial_sequence(),
                     self.jssp.job_machine_dict,
@@ -137,7 +147,7 @@ class PSOOptimizer:
                     global_best_position,
                     num_swaps=max(len(global_best_position) // 4, 3),
                 )
-                new_seed = self.random_seed + len(particles) * 2 + i + 1
+                new_seed = self.get_next_seed()
                 particles[i] = Particle(
                     perturbed, self.jssp.job_machine_dict, random_seed=new_seed
                 )
@@ -146,12 +156,15 @@ class PSOOptimizer:
         self, solution: List[Tuple[int, int]], num_swaps: int = 3
     ) -> List[Tuple[int, int]]:
         """Create a modified version of the solution."""
+        # Create RNG with unique seed for this operation
+        rng = random.Random(self.get_next_seed())
+
         perturbed = deepcopy(solution)
         swaps_done = 0
         attempts = 0
 
         while swaps_done < num_swaps and attempts < MAX_ATTEMPTS_MUTATION:
-            i, j = self.rng.sample(range(len(perturbed)), 2)
+            i, j = rng.sample(range(len(perturbed)), 2)
             if perturbed[i][0] != perturbed[j][0]:
                 perturbed[i], perturbed[j] = perturbed[j], perturbed[i]
 
@@ -190,16 +203,12 @@ class PSOOptimizer:
         # Initialize swarm with unique seeds
         for i in range(num_particles):
             particle_seed = self.random_seed + i * 997  # Large prime for better spread
-            self.rng.seed(particle_seed)
-
             sequence = self.generate_initial_sequence()
             particles.append(
                 Particle(
                     sequence, self.jssp.job_machine_dict, random_seed=particle_seed
                 )
             )
-
-        self.rng.seed(self.random_seed)  # Reset main RNG
 
         for iteration in range(max_iter):
             # Adaptive parameters
