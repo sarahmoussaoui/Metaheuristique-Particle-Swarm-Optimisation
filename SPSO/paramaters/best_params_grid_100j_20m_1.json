@@ -1,26 +1,26 @@
 {
     "best_parameters": {
-        "num_particles": 80,
-        "max_iter": 800,
+        "num_particles": 90,
+        "max_iter": 1000,
         "mutation_rate": 0.7,
-        "max_stagnation": 30,
+        "max_stagnation": 20,
         "early_stopping_window": null,
-        "improvement_threshold": 0.05,
+        "improvement_threshold": 0.01,
         "w": [
             0.2,
             0.9
         ],
         "c1": [
-            0.3,
+            0.5,
             0.9
         ],
         "c2": [
-            0.2,
+            0.4,
             0.8
         ]
     },
-    "makespan": 6382,
-    "execution_time": 1032.9834160804749,
-    "timestamp": "2025-04-11T00:22:13.228586",
+    "makespan": 6248,
+    "execution_time": 1498.8415801525116,
+    "timestamp": "2025-04-11T07:19:13.038629",
     "dataset_file": "src/data/processed/data_100j_20m/data_100j_20m_1.txt"
 }
