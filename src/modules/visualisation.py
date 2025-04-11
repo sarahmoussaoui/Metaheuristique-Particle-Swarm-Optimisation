@@ -72,6 +72,7 @@ class ScheduleVisualizer:
     def plot_convergence(
         iteration_history,
         makespan_history,
+        initial_makespan=None,
         upper_bound=None,
         save_folder=None,
         filename="convergence_plot.png",
@@ -79,16 +80,27 @@ class ScheduleVisualizer:
         """Plots the makespan improvement over iterations and optionally saves to a folder.
 
         Args:
-          iteration_history: List of iteration numbers
-          makespan_history: List of best makespan values at each iteration
-          upper_bound: A constant value representing the upper bound to show on the plot
-          save_folder: Path to folder where plot should be saved (None to not save)
-          filename: Name of the file to save (default: "convergence_plot.png")
+           iteration_history: List of iteration numbers
+           makespan_history: List of best makespan values at each iteration
+           initial_makespan: Makespan of the initial solution (plotted at iteration -1)
+           upper_bound: A constant value representing the upper bound to show on the plot
+           save_folder: Path to folder where plot should be saved (None to not save)
+           filename: Name of the file to save (default: "convergence_plot.png")
         """
         plt.figure(figsize=(10, 5))
+
+        # Combine initial makespan with the rest of the data if provided
+        if initial_makespan is not None:
+            full_iterations = [-50] + iteration_history
+            full_makespans = [initial_makespan] + makespan_history
+        else:
+            full_iterations = iteration_history
+            full_makespans = makespan_history
+
+        # Plot the complete convergence line
         plt.plot(
-            iteration_history,
-            makespan_history,
+            full_iterations,
+            full_makespans,
             "b-",
             linewidth=1.5,
             label="Best Makespan",
@@ -105,13 +117,13 @@ class ScheduleVisualizer:
             )
 
         plt.xlabel("Iteration")
-        plt.ylabel("Best Makespan")
+        plt.ylabel("Makespan")
         plt.title("Makespan Improvement Over Iterations")
         plt.grid(True, linestyle="--", alpha=0.7)
+        plt.legend()
         plt.tight_layout()
 
         if save_folder is not None:
-            # Create directory if it doesn't exist
             os.makedirs(save_folder, exist_ok=True)
             save_path = os.path.join(save_folder, filename)
             plt.savefig(save_path, dpi=300, bbox_inches="tight")

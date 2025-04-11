@@ -59,14 +59,23 @@ class JSSPProcessor:
         )
         exec_time = time.time() - start_time
         if self.plot:
+            ScheduleVisualizer.plot_gantt_chart(
+                jssp,
+                save_folder=self.output_dir,
+                filename="Gantt_chart_after_optimization.png",
+            )
             ScheduleVisualizer.plot_convergence(
                 optimizer.iteration_history,
                 optimizer.makespan_history,
+                initial_makespan=jssp.calc_init_makespan(),
                 upper_bound=upper_bound,
                 save_folder=self.output_dir,
             )
-            ScheduleVisualizer.plot_gantt_chart(jssp, save_folder=self.output_dir)
-
+            ScheduleVisualizer.plot_gantt_chart(
+                jssp,
+                save_folder=self.output_dir,
+                filename="Gantt_chart_before_optimization.png",
+            )
             self._log_results(best_makespan, exec_time)
 
         print(
