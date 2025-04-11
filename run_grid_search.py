@@ -17,12 +17,12 @@ def main():
     # Optional: Customize parameter grid if needed
     grid_search.set_parameter_grid(
         {
-            "num_particles": [120],
-            "max_iter": [5000],
-            "w": [(0.2, 0.9)],  # (min, max) tuples
-            "c1": [(0.3, 0.9)],  # (min, max) tuples
-            "c2": [(0.4, 0.8)],  # (min, max) tuples
-            "mutation_rate": [0.7],
+            "num_particles": [100, 120],
+            "max_iter": [3000],
+            "w": [(0.2, 0.9), (0.4, 0.8)],  # (min, max) tuples
+            "c1": [(0.5, 0.9), (0.3, 0.8)],  # (min, max) tuples
+            "c2": [(0.4, 0.9), (0.5, 0.7)],  # (min, max) tuples
+            "mutation_rate": [0.7, 0.5],
             "max_stagnation": [20],
             "early_stopping_window": [None],
             "improvement_threshold": [0.01],
