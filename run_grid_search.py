@@ -3,12 +3,12 @@ from src.modules.gridSearch import PSOGridSearch
 
 def main():
     # Configuration
-    dataset_file = "src/data/processed/data_20j_15m/data_20j_15m_1.txt"  # Folder containing your JSSP instance files
+    dataset_file = "src/data/processed/data_30j_15m/data_30j_15m_1.txt"  # Folder containing your JSSP instance files
     output_params = (
-        "SPSO/paramaters/best_params_grid.json"  # Output file for best parameters
+        "SPSO/paramaters/best_params_grid_30j_15m.json"  # Output file for best parameters
     )
     output_history = (
-        "SPSO/paramaters/search_history_grid.csv"  # Output file for search history
+        "SPSO/paramaters/search_history_grid_30j_15m.csv"  # Output file for search history
     )
 
     # Initialize and run grid search
@@ -20,18 +20,19 @@ def main():
 
     # Optional: Customize parameter grid if needed
     grid_search.set_parameter_grid(
-        {
-            "num_particles": [20],
-            "max_iter": [1000],
-            "w": [1],
-            "c1": [1],
-            "c2": [0.5],
-            "mutation_rate": [0.5],
-            "max_stagnation": [20],
-            "early_stopping_window": [None],
-            "improvement_threshold": [0.01],
-        }
-    )
+    {
+        "num_particles": [75, 100, 150],  
+        "max_iter": [1000],  
+        "w": [0.3, 0.5, 0.8],  
+        "c1": [0.4, 0.7, 0.9],  
+        "c2": [0.4, 0.7, 0.9],  
+        "mutation_rate": [0.3, 0.6], 
+        "max_stagnation": [20],  
+        "early_stopping_window": [None],  
+        "improvement_threshold": [ 0.08],  
+    }
+)
+
     # Optional: Customize parameter grid if needed
 
     print("Starting grid search...")
@@ -40,7 +41,7 @@ def main():
     print("\nGrid search completed!")
     print(f"Best parameters saved to: {output_params}")
     print(f"Search history saved to: {output_history}")
-    print(f"Best average makespan: {results['best_avg_makespan']:.2f}")
+    #print(f"Best average makespan: {results['best_avg_makespan']:.2f}")
 
 
 if __name__ == "__main__":

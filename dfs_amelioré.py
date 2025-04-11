@@ -13,92 +13,96 @@ class JSSPSolverDFS:
 
     def solve(self):
         """Méthode principale pour lancer la résolution"""
-        self.jssp.initialize_schedule()  # Réinitialise le planning
-        self.DFS(self.jssp.jobs, [], 0)  # Lance la recherche DFS
-        return self.best_schedule, self.best_makespan  # Retourne la meilleure solution
+        self.jssp.initialize_schedule()
+        self.DFS(self.jssp.jobs, [], 0)
+        
+        return self.best_schedule, self.best_makespan
+
+    def lower_bound(self, remaining_jobs, current_makespan):
+        """
+        Borne inférieure simple : max(makespan actuel, temps total restant du job le plus long)
+        """
+        max_remaining_job_time = max(
+            (sum(op.processing_time for op in job.operations[job.current_operation_index:])
+             for job in remaining_jobs if job.current_operation_index < len(job.operations)),
+            default=0
+        )
+        return max(current_makespan, max_remaining_job_time)
 
     def DFS(self, remaining_jobs, current_schedule, current_makespan):
-        
-        self.nodes_explored += 1  
+        self.nodes_explored += 1
 
-        # Condition d'arrêt : plus de jobs à ordonnancer
+        # Branch and Bound : élagage si borne inférieure ≥ meilleure solution
+        estimated_lb = self.lower_bound(remaining_jobs, current_makespan)
+        if estimated_lb >= self.best_makespan:
+            return
+
+        # Si toutes les opérations sont planifiées
         if not remaining_jobs:
-            # Si la solution courante est meilleure, on la sauvegarde
             if current_makespan < self.best_makespan:
                 self.best_makespan = current_makespan
                 self.best_schedule = deepcopy(current_schedule)
             return
 
-        # Tri des jobs par ordre croissant de temps restant 
+        # Heuristique de tri : jobs avec plus de charge restante d'abord
         remaining_jobs.sort(
             key=lambda j: (
-                # Critère principal : temps total restant pour le job
                 sum(op.processing_time for op in j.operations[j.current_operation_index:]),
-                # Critère secondaire : priorité aux jobs moins avancés (index bas)
-                -j.current_operation_index 
+                -j.current_operation_index
             ),
-            reverse=True  # Tri décroissant
+            reverse=True
         )
 
-        # Exploration de chaque job restant
+        # Exploration de chaque job
         for job in remaining_jobs:
-            # Si le job a terminé toutes ses opérations, on passe au suivant
             if job.current_operation_index >= len(job.operations):
                 continue
 
-            # Récupération de l'opération courante à planifier
             op = job.operations[job.current_operation_index]
-            machine_mapping = op.machine + 1  # Conversion 0-indexé → 1-indexé car dans modélisation on commence par zero 
-            processing_time = op.processing_time  # Durée de l'opération
+            machine_mapping = op.machine + 1
+            processing_time = op.processing_time
 
-            # Calcul du temps de début possible :
-            # 1. Temps de fin de l'opération précédente dans le même job
             last_op_end = 0 if job.current_operation_index == 0 else \
                 job.operations[job.current_operation_index - 1].end_time
 
-            # 2. Dernier temps d'utilisation de la machine concernée
-            last_machine_time = max([op.end_time for op in self.jssp.schedule.get(machine_mapping, [])], default=0)
+            last_machine_time = max(
+                (op.end_time for op in self.jssp.schedule.get(machine_mapping, [])),
+                default=0
+            )
 
-            # Le temps de début est le maximum entre ces deux contraintes
             start_time = max(last_op_end, last_machine_time)
-            end_time = start_time + processing_time  # Temps de fin
+            end_time = start_time + processing_time
 
-            # Élagage : si cette branche ne peut pas améliorer la solution
+            # Élagage immédiat si dépasse déjà la meilleure solution
             if end_time >= self.best_makespan:
-                continue  # On abandonne cette branche
+                continue
 
-            # Mise à jour des attributs de l'opération
             op.start_time = start_time
             op.end_time = end_time
-            # Ajout au planning central (1-indexé)
             self.jssp.schedule[machine_mapping].append(op)
 
-            # Passage à l'opération suivante pour ce job
             job.current_operation_index += 1
-            # Filtrage des jobs ayant encore des opérations à planifier
             new_remaining_jobs = [j for j in remaining_jobs if j.current_operation_index < len(j.operations)]
 
-            # Appel récursif pour explorer cette branche
             self.DFS(
-                new_remaining_jobs,  # Jobs restants
-                current_schedule + [{  # Nouvelle entrée dans le planning
+                new_remaining_jobs,
+                current_schedule + [{
                     'job_id': job.job_id,
                     'operation': job.current_operation_index - 1,
-                    'machine': op.machine,  # 0-indexé pour la sortie
+                    'machine': op.machine,
                     'start_time': start_time,
                     'end_time': end_time
                 }],
-                max(current_makespan, end_time)  # Nouveau makespan courant
+                max(current_makespan, end_time)
             )
 
-            
-            job.current_operation_index -= 1  # Revenir à l'opération précédente
-            op.start_time = None  # Réinitialiser
-            op.end_time = None  # Réinitialiser
-            self.jssp.schedule[machine_mapping].remove(op)  # Retirer du planning
+            # Backtrack
+            job.current_operation_index -= 1
+            op.start_time = None
+            op.end_time = None
+            self.jssp.schedule[machine_mapping].remove(op)
 
 if __name__ == "__main__":
-   
     machines_matrix = [
         [0, 1, 2, 3, 4],
         [1, 2, 3, 4, 0],
@@ -115,24 +119,20 @@ if __name__ == "__main__":
         [1, 3, 4, 5, 2]
     ]
 
-  
-    jssp = JSSP(machines_matrix, times_matrix)  
-    solver = JSSPSolverDFS(jssp)  
+    jssp = JSSP(machines_matrix, times_matrix)
+    solver = JSSPSolverDFS(jssp)
 
-    
     start_time = time.time()
     best_schedule, best_makespan = solver.solve()
     execution_time = time.time() - start_time
 
-    # Affichage des résultats
-    print(f"Optimal Makespan: {best_makespan} (Expected: 4)")
+    # Résultats
+    print(f"Optimal Makespan: {best_makespan}")
     print(f"Execution Time: {execution_time:.2f} seconds")
     print(f"Nodes Explored: {solver.nodes_explored}")
 
-    # Affichage détaillé par machine
     print("\nMachine Schedules (0-indexed):")
-    for m in range(len(machines_matrix[0])):  # Pour chaque machine
-        # Filtrage et tri des opérations par machine
+    for m in range(len(machines_matrix[0])):
         machine_ops = [op for op in best_schedule if op['machine'] == m]
         machine_ops.sort(key=lambda x: x['start_time'])
         print(f"Machine {m}:")
