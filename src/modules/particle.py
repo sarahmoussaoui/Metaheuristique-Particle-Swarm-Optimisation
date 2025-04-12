@@ -25,7 +25,7 @@ class Particle:
         self.fitness = float("inf")
         self.job_machine_dict = job_machine_dict
         self.max_velocity_size = max_velocity_size or max(5, len(sequence) // 2)
-        self.rng = random.Random(random_seed) if random_seed else random.Random()
+        self.rng = random.Random(random_seed) if random_seed else random.Random() #  les résultats aléatoires seront toujours les mêmes à chaque exécution (with seed)
 
         self.initialize_velocity()
 
@@ -42,8 +42,8 @@ class Particle:
 
         # Sample without replacement if enough swaps exist
         if valid_swaps:
-            num_swaps = min(self.max_velocity_size, len(valid_swaps))
-            self.velocity = self.rng.sample(valid_swaps, num_swaps)
+            num_swaps = min(self.max_velocity_size, len(valid_swaps)) # Limit to max velocity size
+            self.velocity = self.rng.sample(valid_swaps, num_swaps) # On sélectionne aléatoirement num_swaps échanges sans remise (pas deux fois le même swap)
 
     def is_machine_order_valid(
         self, position: List[Tuple[int, int]], job_id: int
@@ -131,7 +131,7 @@ class Particle:
         ]
 
         if diff_indices and self.rng.random() < c2:
-            for i in self.rng.sample(diff_indices, min(3, len(diff_indices))):
+            for i in self.rng.sample(diff_indices, min(3, len(diff_indices))): # On en sélectionne au maximum 3 de manière aléatoire (sans remise), pour garder des mises à jour légères et efficaces.
                 try:
                     j = global_best_position.index(self.position[i])
                     if (
@@ -170,8 +170,8 @@ class Particle:
         """Enhanced mutation with more diverse operations."""
         if self.rng.random() < mutation_rate:
             # 50% chance for block mutation
-            if self.rng.random() < 0.5:
-                block_size = self.rng.randint(2, min(10, len(self.position) // 3))
+            if self.rng.random() < 0.5: #  mutation de bloc modifier plusieurs opérations dans un segment consécutif de la position
+                block_size = self.rng.randint(2, min(10, len(self.position) // 3)) # Random block size between 2 and 10 or a third of the position length
                 start = self.rng.randint(0, len(self.position) - block_size)
                 end = start + block_size
 
@@ -184,7 +184,7 @@ class Particle:
                 # Validate block can be shuffled
                 valid = True
                 for job, ops in job_ops.items():
-                    if ops != self.job_machine_dict[job][: len(ops)]:
+                    if ops != self.job_machine_dict[job][: len(ops)]: # Check if the operations in the block are in the correct order
                         valid = False
                         break
 
