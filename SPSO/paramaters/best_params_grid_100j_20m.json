@@ -1,0 +1,17 @@
+{
+    "best_parameters": {
+        "num_particles": 50,
+        "max_iter": 1000,
+        "w": 0.7,
+        "c1": 0.5,
+        "c2": 0.65,
+        "mutation_rate": 0.3,
+        "max_stagnation": 20,
+        "early_stopping_window": null,
+        "improvement_threshold": 0.01
+    },
+    "makespan": 6248,
+    "execution_time": 1079.8810997009277,
+    "timestamp": "2025-04-11T22:06:58.974775",
+    "dataset_file": "src/data/processed/data_100j_20m/data_100j_20m_1.txt"
+}
